@@ -89,7 +89,7 @@ abstract class ComActorsControllerPermissionAbstract extends LibBaseControllerPe
      * 
      * @return boolean
      */
-    public function canAddrequester()
+    public function canAddrequest()
     {
         if(!$this->actor)
             return false;
@@ -105,15 +105,31 @@ abstract class ComActorsControllerPermissionAbstract extends LibBaseControllerPe
      * 
 	 * @return boolean
 	 */
+	public function canAddfollow()
+	{
+        if(!$this->actor)
+            return false;
+            
+	    if(!$this->getItem())
+            return false;  
+            
+	    return $this->getItem()->authorize('follower', array('viewer'=>$this->actor));	    
+	}
+	
+	/**
+	 * Authorize adding a follower to the actor
+     * 
+	 * @return boolean
+	 */
 	public function canAddfollower()
 	{
         if(!$this->actor)
             return false;
             
 	    if(!$this->getItem())
-            return false;
-	    
-	    return $this->getItem()->authorize('follower', array('viewer'=>$this->actor));	    
+            return false;  
+            
+	    return $this->getItem()->authorize('leadable', array('viewer'=>$this->actor));	    
 	}
     
     /**
@@ -121,7 +137,7 @@ abstract class ComActorsControllerPermissionAbstract extends LibBaseControllerPe
      * 
      * @return boolean
      */
-    public function canDeletefollower()
+    public function canDeletefollow()
     {
         if(!$this->actor)
             return false;
@@ -137,14 +153,17 @@ abstract class ComActorsControllerPermissionAbstract extends LibBaseControllerPe
      * 
      * @return boolean
      */
-    public function canAddblocked()
+    public function canAddblock()
     {
-        if(!$this->actor)
+    	if(!$this->actor)
             return false;
-            
+
         if(!$this->getItem())
+            return false;   
+   
+		if($this->getItem()->isAdministrable() && !$this->canAdminister())	
             return false;
-        
+
         return $this->actor->authorize('blocker', array('viewer'=>$this->getItem()));     
     }
     
@@ -163,7 +182,7 @@ abstract class ComActorsControllerPermissionAbstract extends LibBaseControllerPe
      * 
      * @return boolean
      */    
-    public function canConfirmrequester()
+    public function canConfirmrequest()
     {        
         return !is_null($this->requester);
     }
@@ -173,7 +192,7 @@ abstract class ComActorsControllerPermissionAbstract extends LibBaseControllerPe
      *   
      * @return boolean
      */    
-    public function canIgnorerequester()
+    public function canIgnorerequest()
     {
         return !is_null($this->requester);
     }    

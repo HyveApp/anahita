@@ -39,15 +39,10 @@ class ComActorsControllerBehaviorFollowable extends KControllerBehaviorAbstract
         parent::__construct($config);
         
         $config->mixer->registerCallback(
-            array('before.deletefollower','before.addfollower',
-                  'before.addrequester','before.deleterequester',
-                  'before.addblocked','before.deleteblocked'), 
+            array('before.unfollow','before.follow', 'before.addfollower',
+                  'before.addrequest','before.deleterequest',
+                  'before.block','before.unblock'), 
                   array($this, 'getActor'));
-                  
-        $config->mixer->registerActionAlias('follow', 'addfollower');
-        
-        $config->mixer->registerActionAlias('unfollow', 'deletefollower');
-                   
     }
     
     /**
@@ -57,7 +52,7 @@ class ComActorsControllerBehaviorFollowable extends KControllerBehaviorAbstract
      * 
      * @return void
      */
-    protected function _actionAddrequester(KCommandContext $context)
+    protected function _actionAddrequest(KCommandContext $context)
     {        
         $this->getResponse()->status = KHttpResponse::RESET_CONTENT;
         
@@ -75,7 +70,7 @@ class ComActorsControllerBehaviorFollowable extends KControllerBehaviorAbstract
      * 
      * @return void
      */
-    protected function _actionDeleterequester(KCommandContext $context)
+    protected function _actionDeleterequest(KCommandContext $context)
     {
         $this->getResponse()->status = KHttpResponse::RESET_CONTENT;
         
@@ -90,23 +85,71 @@ class ComActorsControllerBehaviorFollowable extends KControllerBehaviorAbstract
 	 * 
 	 * @return void 
 	 */
-	protected function _actionAddfollower(KCommandContext $context)
+	protected function _actionFollow(KCommandContext $context)
 	{
         $this->getResponse()->status = KHttpResponse::RESET_CONTENT;
         
-		if(!$this->getItem()->leading( $this->actor ))
+		if(!$this->getItem()->leading($this->actor))
 		{
-		    $this->getItem()->addFollower( $this->actor );
+		    $this->getItem()->addFollower($this->actor);
 		    
-		    $story = $this->createStory(array(
-		            'name' 		=> 'actor_follow',
-		            'subject'	=> $this->actor,
-		            'owner'		=> $this->actor,
-		            'target'	=> $this->getItem()
-		    ));
+	    	$story = $this->createStory(array(
+	    		'name' => 'actor_follow',
+	        	'subject' => $this->actor,
+	        	'owner' => $this->actor,
+	        	'target' => $this->getItem()
+	    	));
+
+	    	if($this->getItem()->isAdministrable())
+	    		$subscribers = $this->getItem()->administratorIds->toArray();
+	    	else
+	    		$subscribers = array($this->getItem()->id);
+	    	
+	    	$this->createNotification(array(
+	    		'name' => 'actor_follow',
+	    		'subject' => $this->actor, 
+	    		'target' => $this->getItem(),
+	    		'subscribers' => $subscribers
+	    	));
+		}
+        
+        return $this->getItem();
+	}
+	
+	/**
+	 * Viewer adds a follower to the current actor resource. status is set to 
+     * KHttpResponse::RESET_CONTENT;
+	 * 
+	 * @param KCommandContext $context Context Parameter
+	 * 
+	 * @return void 
+	 */
+	protected function _actionAddfollower(KCommandContext $context)
+	{
+		$this->getResponse()->status = KHttpResponse::RESET_CONTENT;
+        
+		if(!$this->getItem()->leading($this->actor))
+		{
+		    $this->getItem()->addFollower($this->actor);
 		    
-		    //if the entity is not an adiminstrable actor (person)
-		    $this->createNotification(array('subject'=>$this->actor, 'target'=>$this->getItem(),'name'=>'actor_follow'));
+	    	$this->createStory(array(
+	    		'name' => 'actor_follower_add',
+	    		'owner' => $this->getItem(),
+	    		'subject' => $this->viewer,
+	    		'object' => $this->actor,
+	    		'target' => $this->getItem()
+	    	));
+	    		
+	    	$subscribers = array($this->actor->id);	
+	    	$subscribers = array_merge($subscribers, $this->getItem()->administratorIds->toArray());
+	    	
+	    	$this->createNotification(array(
+	    		'name' => 'actor_follower_add',
+	    		'subject' => $this->viewer,
+	    		'object' => $this->actor,
+	    		'target' => $this->getItem(),
+	    		'subscribers' => $subscribers
+	    	));
 		}
         
         return $this->getItem();
@@ -119,11 +162,11 @@ class ComActorsControllerBehaviorFollowable extends KControllerBehaviorAbstract
 	 * 
 	 * @return void
 	 */
-	protected function _actionDeletefollower(KCommandContext $context)
+	protected function _actionUnfollow(KCommandContext $context)
 	{
         $this->getResponse()->status = KHttpResponse::RESET_CONTENT;
         
-		$this->getItem()->removeFollower( $this->actor );
+		$this->getItem()->removeFollower($this->actor);
         
 		return $this->getItem();
 	}
@@ -135,7 +178,7 @@ class ComActorsControllerBehaviorFollowable extends KControllerBehaviorAbstract
      *
      * @return void
      */
-    protected function _actionAddblocked(KCommandContext $context)
+    protected function _actionBlock(KCommandContext $context)
     {
         $this->getResponse()->status = KHttpResponse::RESET_CONTENT;
         
@@ -151,7 +194,7 @@ class ComActorsControllerBehaviorFollowable extends KControllerBehaviorAbstract
      * 
      * @return void
      */
-    protected function _actionDeleteblocked($context)
+    protected function _actionUnblock($context)
     {
         $this->getResponse()->status = KHttpResponse::RESET_CONTENT;
         
@@ -174,6 +217,7 @@ class ComActorsControllerBehaviorFollowable extends KControllerBehaviorAbstract
         $filters  = array();
         $entities = array();
         $entity = $this->getItem();
+        $viewer = get_viewer();
         
         if($this->getItem()->isFollowable())
         {
@@ -185,6 +229,30 @@ class ComActorsControllerBehaviorFollowable extends KControllerBehaviorAbstract
             {
                 $entities = $this->getItem()->blockeds;
             }
+            elseif($this->type == 'leadables')
+            {
+            	if(!$entity->authorize('leadable'))
+            	{
+            		throw new LibBaseControllerExceptionForbidden('Forbidden');
+
+            		return false;
+            	}	
+            	
+            	$excludeIds = KConfig::unbox($entity->followers->id);
+            	$excludeIds = array_merge($excludeIds, KConfig::unbox($entity->blockeds->id));
+            	
+            	if($viewer->admin())
+            	{
+            		$entities = $this->_mixer->getService('com://site/people.domain.entity.person')
+            					->getRepository()->getQuery()
+            					->where('person.id', 'NOT IN', $excludeIds);	
+            	}
+            	else 
+            	{            	
+            		$entities = $viewer->followers->where('actor.id', 'NOT IN', $excludeIds);
+            	}
+            	
+            }
         }
         
         if($this->getItem()->isLeadable()) 
@@ -193,7 +261,7 @@ class ComActorsControllerBehaviorFollowable extends KControllerBehaviorAbstract
             {
                 $entities = $this->getItem()->leaders;
             } 
-            elseif( $this->type == 'mutuals')
+            elseif($this->type == 'mutuals')
             {
                 $entities = $this->getItem()->getMutuals();
             }
@@ -212,11 +280,11 @@ class ComActorsControllerBehaviorFollowable extends KControllerBehaviorAbstract
             $entities->where('id','NOT IN', $xid);
             
         $entities->limit($this->limit, $this->start);
-        
-        if($this->q)
-            $entities->keyword($this->q);
             
-        $this->setList($entities)->actor($this->getItem());
+        if($this->q)
+            $entities->keyword($this->q);    
+            
+        $this->setList($entities->fetchSet())->actor($this->getItem());
        
         return $entities;
     }
@@ -226,7 +294,7 @@ class ComActorsControllerBehaviorFollowable extends KControllerBehaviorAbstract
      * 
      * @param KCommandContext $context Context parameter
      * 
-     * @return void
+     * @return ComActorsDomainEntityActor object
      */
     public function getActor(KCommandContext $context)
     {
