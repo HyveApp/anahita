@@ -40,6 +40,8 @@ class ComBaseDomainSerializerDefault extends AnDomainSerializerDefault
         
         $data['objectType'] = 'com.'.$entity->getIdentifier()->package.'.'.$entity->getIdentifier()->name;
         
+        $commands = array();
+
         if($entity->isDescribable()) 
         {
             $data['name']  = $entity->name;
@@ -123,6 +125,10 @@ class ComBaseDomainSerializerDefault extends AnDomainSerializerDefault
             {
                 $data['isFollower'] = $viewer->leading($entity);   
             }
+
+            if (!is_person($entity) && $entity->authorize('delete')) {
+                $commands[] = 'delete';
+            }
         }        
         
         if($entity->isModifiable() && !is_person($entity)) 
@@ -152,15 +158,25 @@ class ComBaseDomainSerializerDefault extends AnDomainSerializerDefault
             $data['lastCommentTime'] = $entity->lastCommentTime ? $entity->lastCommentTime->getDate() : null;
             $data['lastComment'] = null;
             $data['lastCommenter'] = null;
-            
+
             if(isset($entity->lastComment)) 
             {
                 $data['lastComment'] = $entity->lastComment->toSerializableArray();                
             }
-            
+
             if(isset($entity->lastCommenter)) 
             {
                 $data['lastCommenter'] = $entity->lastCommenter->toSerializableArray();                
+            }
+
+            if (!array_key_exists('comments', $data)) {
+                $comments = array();
+                foreach($entity->comments as $comment) {
+                   $comments[] = $comment->toSerializableArray();
+                }
+                if (!empty($comments)) {
+                    $data['comments'] = $comments;
+                }
             }
         }
         
@@ -183,11 +199,24 @@ class ComBaseDomainSerializerDefault extends AnDomainSerializerDefault
         if($entity->isVotable()) 
         {
             $data['voteUpCount'] = $entity->voteUpCount;
+            if ($viewer) {
+                $voted = $entity->votedUp($viewer);
+                if ($voted) {
+                    $commands[] = 'unvote';
+                }
+                else {
+                    $commands[] = 'vote';
+                }
+            }
         }
         
         if($entity->isOwnable()) 
         {
             $data['owner'] = $entity->owner->toSerializableArray();
+        }
+
+        if (!array_key_exists('commands', $data) && !empty($commands)) {
+            $data['commands'] = $commands;
         }
         
         return KConfig::unbox($data);
