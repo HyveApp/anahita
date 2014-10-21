@@ -2,15 +2,17 @@
 <!DOCTYPE html>
 <html>
     <head>
-    	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <?= @render('style') ?>                
-    </head>
-    <body>
+  		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  		<?= @render('favicon') ?>
+  		<?= @render('style') ?>
         <?= @template('tmpl/js') ?>
-        <?= @template('tmpl/navbar') ?>
-      
-        <?= @render('component') ?>
-
         <?= @render('analytics') ?>
+  	</head>
+    <body>
+        <?= @template('tmpl/navbar') ?>
+        
+        <div class="container">
+    	<?= $this->getView()->content; ?>
+    	</div>
     </body>
 </html>

@@ -95,13 +95,18 @@ abstract class PlgContentfilterAbstract extends KCommand implements PlgContentfi
 	 */
 	protected function _stripTags(&$text)
 	{
-		$regexp		  = '@<(\w+)\b.*?>.*?</\1>@si';
-	 	$matches 	  = array();
+		$regexp = '@<(\w+)\b.*?>.*?</\1>@si';
+	 	$matches = array();
 	 	$replacements = array();
-		if (  preg_match_all($regexp, $text, $matches) ) {
+	 	
+		if(preg_match_all($regexp, $text, $matches)) 
+		{
 			$matches = $matches[0];
-			foreach($matches as $i => $tag) $replacements[] = $i.'-'.md5($tag);
-			$text 	 = str_replace($matches, $replacements, $text);
+			
+			foreach($matches as $i => $tag) 
+				$replacements[] = $i.'-'.md5($tag);
+				
+			$text = str_replace($matches, $replacements, $text);
 		}
 		
 		$this->_stripped_tags = array($replacements, $matches);
@@ -117,6 +122,6 @@ abstract class PlgContentfilterAbstract extends KCommand implements PlgContentfi
 	protected function _replaceTags(&$text)
 	{
 		if ( !empty($this->_stripped_tags) )
-			$text 	 = str_replace($this->_stripped_tags[0], $this->_stripped_tags[1], $text);
+			$text = str_replace($this->_stripped_tags[0], $this->_stripped_tags[1], $text);
 	}	
 }

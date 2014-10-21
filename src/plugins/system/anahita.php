@@ -38,15 +38,13 @@ class PlgSystemAnahita extends JPlugin
 	public function __construct($subject, $config = array())
 	{	    
         // Command line fixes for Joomla
-        if (PHP_SAPI === 'cli') 
+        if(PHP_SAPI === 'cli') 
         {
-            if (!isset($_SERVER['HTTP_HOST'])) {
+            if(!isset($_SERVER['HTTP_HOST']))
                 $_SERVER['HTTP_HOST'] = '';
-            }
             
-            if (!isset($_SERVER['REQUEST_METHOD'])) {
+            if(!isset($_SERVER['REQUEST_METHOD']))
                 $_SERVER['REQUEST_METHOD'] = '';
-            }
         }                
         
         // Check for suhosin
@@ -79,7 +77,7 @@ class PlgSystemAnahita extends JPlugin
 
         if(!JFactory::getApplication()->getCfg('caching') || (JFactory::getUser()->usertype == 'Super Administrator' && KRequest::get('get.clearapc', 'cmd'))) 
         {
-            //clear apc cache for module and components
+            //clear apc cache for components
             //@NOTE If apc is shared across multiple services
             //this causes the caceh to be cleared for all of them
             //since all of them starts with the same prefix. Needs to be fix
@@ -110,15 +108,16 @@ class PlgSystemAnahita extends JPlugin
         global $mainframe;
 
         // No remember me for admin
-        if ($mainframe->isAdmin())
+        if($mainframe->isAdmin())
             return;  
 
         //if alredy logged in then forget it
-        if (!JFactory::getUser()->guest)
+        if(!JFactory::getUser()->guest)
             return;    
         
         jimport('joomla.utilities.utility');
         jimport('joomla.utilities.simplecrypt');
+        
         $user = array();
         $remember = JUtility::getHash('JLOGIN_REMEMBER');
         
@@ -131,17 +130,17 @@ class PlgSystemAnahita extends JPlugin
         }
         elseif(isset($_COOKIE[$remember]) && $_COOKIE[$remember] != '')
         {      	
-        	$key = JUtility::getHash(KRequest::get('server.HTTP_USER_AGENT', 'raw'));    
+            $key = JUtility::getHash(KRequest::get('server.HTTP_USER_AGENT', 'raw'));    
             
             if($key)
             {
-            	$crypt    = new JSimpleCrypt($key);
-            	$cookie   = $crypt->decrypt($_COOKIE[$remember]);
-            	$user     = (array) @unserialize($cookie);
+            	$crypt = new JSimpleCrypt($key);
+            	$cookie = $crypt->decrypt($_COOKIE[$remember]);
+            	$user = (array) @unserialize($cookie);
             }
         }
         
-        if (!empty($user)) 
+        if(!empty($user)) 
         {
             jimport('joomla.user.authentication');
             $authentication =& JAuthentication::getInstance();
@@ -149,18 +148,16 @@ class PlgSystemAnahita extends JPlugin
         	try
             {
                 $authResponse = $authentication->authenticate($user, array());
+                
             	if($authResponse->status === JAUTHENTICATE_STATUS_SUCCESS)
-                {
             		KService::get('com://site/people.helper.person')->login($user, true);
-                }
             }
             catch(RuntimeException $e) 
             {
                 //only throws exception if we are using JSON format
                 //otherwise let the current app handle it
-                if ( KRequest::format() == 'json') {
+                if(KRequest::format() == 'json')
                     throw $e;
-                }
             }
         }
         
@@ -190,7 +187,7 @@ class PlgSystemAnahita extends JPlugin
                     ->userId($user['id'])
                     ->fetch();
 							
-		if ($person) 
+		if($person) 
 		{		    
 			KService::get('com://site/people.helper.person')->synchronizeWithUser($person, JFactory::getUser($user['id']));
 		} 

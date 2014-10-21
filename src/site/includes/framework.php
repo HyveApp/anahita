@@ -22,7 +22,6 @@ define('JPATH_ROOT',           JPATH_BASE );
 define('JPATH_SITE',           JPATH_ROOT );
 define('JPATH_CONFIGURATION',  JPATH_ROOT );
 define('JPATH_ADMINISTRATOR',  JPATH_ROOT.'/administrator');
-define('JPATH_XMLRPC',         JPATH_ROOT.'/xmlrpc');
 define('JPATH_LIBRARIES',      JPATH_ROOT.'/libraries');
 define('JPATH_PLUGINS',        JPATH_ROOT.'/plugins');
 define('JPATH_INSTALLATION',   JPATH_ROOT.'/installation');
@@ -33,7 +32,8 @@ define('JPATH_VENDOR',          JPATH_BASE.'/vendor');
 /*
  * Installation check, and check on removal of the install directory.
  */
-if (!file_exists( JPATH_CONFIGURATION.'/configuration.php') || (filesize( JPATH_CONFIGURATION.'/configuration.php') < 10) ) {
+if(!file_exists( JPATH_CONFIGURATION.'/configuration.php') || (filesize( JPATH_CONFIGURATION.'/configuration.php') < 10)) 
+{
 	echo 'No configuration file found. Exiting...';
 	exit();
 }
@@ -43,7 +43,6 @@ require_once(JPATH_LIBRARIES . '/joomla/import.php');
 
 jimport('joomla.application.application');
 jimport('joomla.application.router');
-jimport('joomla.application.menu');
 jimport('joomla.user.user');
 jimport('joomla.environment.uri');
 jimport('joomla.html.html');
@@ -73,9 +72,6 @@ KServiceIdentifier::setApplication('admin', JPATH_ADMINISTRATOR);
 KLoader::addAdapter(new AnLoaderAdapterComponent(array('basepath'=>JPATH_BASE)));
 KServiceIdentifier::addLocator( KService::get('anahita:service.locator.component') );
 
-KLoader::addAdapter(new KLoaderAdapterModule(array('basepath' => JPATH_BASE)));
-KServiceIdentifier::addLocator( KService::get('anahita:service.locator.module') );
-
 KLoader::addAdapter(new KLoaderAdapterPlugin(array('basepath' => JPATH_ROOT)));
 KServiceIdentifier::addLocator(KService::get('koowa:service.locator.plugin'));
 
@@ -92,4 +88,3 @@ $autoloader->unregister();
 $autoloader->register();
 
 KLoader::getInstance()->loadIdentifier('com://site/application.aliases');
-?>

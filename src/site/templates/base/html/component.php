@@ -1,19 +1,20 @@
 <?php defined('KOOWA') or die;?>
 <!DOCTYPE html>
 <html>
-    <head>
+	<head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">	
         <?= @render('favicon') ?>	
-		<?= @render('style') ?>        
+		<?= @render('style') ?>  
+        <?= @template('tmpl/js') ?> 
+        <?= @render('analytics') ?>     
     </head>
-    <body id="tmpl-component">        
-  		<?= @template('tmpl/js') ?>        
+    <body id="tmpl-component">           
         <div id="container-system-message" class="container">       
     		<?= @render('messages') ?>
-    		<?= @helper('modules.render','messages', array('style'=>'none')) ?>
     	</div>
         
-        <?= @render('component') ?>
-        <?= @render('analytics') ?>
+        <div class="container">
+        <?= $this->getView()->content; ?>
+        </div>
     </body>
 </html>

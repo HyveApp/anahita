@@ -56,9 +56,9 @@ class PlgContentfilterLink extends PlgContentfilterAbstract
 		
 		$text = trim($text);
     		    
-    	$text = strip_tags($text, "<b><i><u>");
-    	$text = preg_replace( "/((http|ftp)+(s)?:\/\/[^<>\s]+)/i", "<a href=\"\\0\" target=\"_blank\">\\0</a>", $text);
-
+    	$text = strip_tags($text, "<img><b><i><u>");
+    	$text = preg_replace( "/((?<!=\")(http|ftp)+(s)?:\/\/[^<>\s]+)/i", " <a href=\"\\0\" target=\"_blank\">\\0</a>", $text);
+    	
 		$this->_replaceTags($text);
 		
 		return $text;	

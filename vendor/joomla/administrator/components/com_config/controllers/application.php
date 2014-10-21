@@ -69,17 +69,6 @@ class ConfigControllerApplication extends ConfigController
 
 		$show_hide_r 	= array (JHTML::_('select.option', 0, JText::_('Hide')), JHTML::_('select.option', 1, JText::_('Show')),);
 
-		// -- menu items --
-
-		$query = 'SELECT id AS value, name AS text FROM #__menu'
-				.' WHERE ( type="content_section" OR type="components" OR type="content_typed" )'
-				.' AND published = 1'
-				.' AND access = 0'
-				.' ORDER BY name'
-				;
-		$db->setQuery($query);
-		$menuitems = array_merge($menuitems, $db->loadObjectList());
-
 		// SITE SETTINGS
 		$lists['offline'] = JHTML::_('select.booleanlist', 'offline', 'class="inputbox"', $row->offline);
 		if (!$row->editor) {
@@ -89,15 +78,7 @@ class ConfigControllerApplication extends ConfigController
 		$lists['editor'] 		= JHTML::_('select.genericlist',  $edits, 'editor', 'class="inputbox" size="1"', 'value', 'text', $row->editor);
 		$listLimit 				= array (JHTML::_('select.option', 5, 5), JHTML::_('select.option', 10, 10), JHTML::_('select.option', 15, 15), JHTML::_('select.option', 20, 20), JHTML::_('select.option', 25, 25), JHTML::_('select.option', 30, 30), JHTML::_('select.option', 50, 50), JHTML::_('select.option', 100, 100),);
 		$lists['list_limit'] 	= JHTML::_('select.genericlist',  $listLimit, 'list_limit', 'class="inputbox" size="1"', 'value', 'text', ($row->list_limit ? $row->list_limit : 50));
-    
-		/*
-		jimport('joomla.language.help');
-		$helpsites 				= array ();
-		$helpsites 				= JHelp::createSiteList(JPATH_BASE.DS.'help'.DS.'helpsites-15.xml', $row->helpurl);
-		array_unshift($helpsites, JHTML::_('select.option', '', JText::_('local')));
-		$lists['helpsites'] 	= JHTML::_('select.genericlist',  $helpsites, 'helpurl', ' class="inputbox"', 'value', 'text', $row->helpurl);
-        */
-		
+    	
 		// DEBUG
 		$lists['debug'] 		= JHTML::_('select.booleanlist', 'debug', 'class="inputbox"', $row->debug);
 		$lists['debug_lang'] 	= JHTML::_('select.booleanlist', 'debug_lang', 'class="inputbox"', $row->debug_lang);
@@ -107,7 +88,7 @@ class ConfigControllerApplication extends ConfigController
 		// SERVER SETTINGS
 		$lists['gzip'] 			= JHTML::_('select.booleanlist', 'gzip', 'class="inputbox"', $row->gzip);
 		$errors 				= array (JHTML::_('select.option', -1, JText::_('System Default')), JHTML::_('select.option', 0, JText::_('None')), JHTML::_('select.option', E_ERROR | E_WARNING | E_PARSE, JText::_('Simple')), JHTML::_('select.option', E_ALL ^ E_STRICT, JText::_('Maximum')));
-		$lists['xmlrpc_server'] = JHTML::_('select.booleanlist', 'xmlrpc_server', 'class="inputbox"', $row->xmlrpc_server);
+		
 		$lists['error_reporting'] = JHTML::_('select.genericlist',  $errors, 'error_reporting', 'class="inputbox" size="1"', 'value', 'text', $row->error_reporting);
 		$lists['enable_ftp'] 	= JHTML::_('select.booleanlist', 'ftp_enable', 'class="inputbox"', intval($row->ftp_enable));
 
@@ -294,7 +275,6 @@ class ConfigControllerApplication extends ConfigController
 		$config_array['secret']				= JRequest::getVar('secret', 0, 'post', 'string');
 		$config_array['gzip']				= JRequest::getVar('gzip', 0, 'post', 'int');
 		$config_array['error_reporting']	= JRequest::getVar('error_reporting', -1, 'post', 'int');
-		$config_array['xmlrpc_server']		= JRequest::getVar('xmlrpc_server', 0, 'post', 'int');
 		$config_array['log_path']			= JRequest::getVar('log_path', JPATH_ROOT.DS.'logs', 'post', 'string');
 		$config_array['tmp_path']			= JRequest::getVar('tmp_path', JPATH_ROOT.DS.'tmp', 'post', 'string');
 		$config_array['live_site'] 			= preg_replace('/\/administrator.*/','',JURI::getInstance()->toString(array('scheme','host','port','path')));//rtrim(JRequest::getVar('live_site','','post','string'), );

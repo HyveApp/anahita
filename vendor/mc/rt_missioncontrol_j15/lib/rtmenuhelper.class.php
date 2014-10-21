@@ -31,23 +31,14 @@ class RTMenuHelper {
 		$usertype	= $user->get('usertype');
 
 		// cache some acl checks
-		$canCheckin			= $user->authorize('com_checkin', 'manage');
 		$canConfig			= $user->authorize('com_config', 'manage');
 		$manageTemplates	= $user->authorize('com_templates', 'manage');
-		$manageTrash		= $user->authorize('com_trash', 'manage');
-		$manageMenuMan		= $user->authorize('com_menus', 'manage');
 		$manageLanguages	= $user->authorize('com_languages', 'manage');
-		$installModules		= $user->authorize('com_installer', 'module');
-		$editAllModules		= $user->authorize('com_modules', 'manage');
 		$installPlugins		= $user->authorize('com_installer', 'plugin');
 		$editAllPlugins		= $user->authorize('com_plugins', 'manage');
 		$installComponents	= $user->authorize('com_installer', 'component');
 		$editAllComponents	= $user->authorize('com_components', 'manage');
 		$canManageUsers		= $user->authorize('com_users', 'manage');
-
-		// Menu Types
-		require_once( JPATH_ADMINISTRATOR.DS.'components'.DS.'com_menus'.DS.'helpers'.DS.'helper.php' );
-		$menuTypes 	= MenusHelper::getMenuTypelist();
 
 		/*
 		 * Get the menu object
@@ -68,99 +59,35 @@ class RTMenuHelper {
 			$menu->addChild(new JMenuNode(JText::_('Users'), 'index.php?option=com_users&task=view', 'users'));
 		}
 
-
-		/*
-		 * Content SubMenu
-		 */
-// 		$menu->addChild(new JMenuNode(JText::_('Articles')), true);
-// 		$menu->addChild(new JMenuNode(JText::_('Article Manager'), 'index.php?option=com_content', 'article'));
-// 		if ($manageTrash) {
-// 			$menu->addChild(new JMenuNode(JText::_('Article Trash'), 'index.php?option=com_trash&task=viewContent', 'trash'));
-// 		}
-// 		$menu->addSeparator();
-// 		$menu->addChild(new JMenuNode(JText::_('Section Manager'), 'index.php?option=com_sections&scope=content', 'section'));
-// 		$menu->addChild(new JMenuNode(JText::_('Category Manager'), 'index.php?option=com_categories&section=com_content', 'category'));
-// 		$menu->addSeparator();
-// 		//$menu->addChild(new JMenuNode(JText::_('Frontpage Manager'), 'index.php?option=com_frontpage', 'frontpage'));
-
-// 		$menu->getParent();
-		
-		/*
-		 * Menus SubMenu
-		 */
-		$menu->addChild(new JMenuNode(JText::_('Menus')), true);
-		if ($manageMenuMan) {
-			$menu->addChild(new JMenuNode(JText::_('Menu Manager'), 'index.php?option=com_menus', 'menu'));
-		}
-// 		if ($manageTrash) {
-// 			$menu->addChild(new JMenuNode(JText::_('Menu Trash'), 'index.php?option=com_trash&task=viewMenu', 'trash'));
-// 		}
-
-		if($manageTrash || $manageMenuMan) {
-			$menu->addSeparator();
-		}
-		/*
-		 * SPLIT HR
-		 */
-		if (count($menuTypes)) {
-			foreach ($menuTypes as $menuType) {
-				$menu->addChild(
-					new JMenuNode(
-						$menuType->title . ($menuType->home ? ' <span class="default">*</span>' : ''), 
-						'index.php?option=com_menus&task=view&menutype='
-						. $menuType->menutype,
-						'menu'
-					)
-				);
-			}
-		}
-
-		$menu->getParent();
-
 		/*
 		 * Extend SubMenu
 		 */
-		if ($installModules || $editAllComponents) {
-			$menu->addChild(new JMenuNode(JText::_('Extend')), true);
-		} 
-
-		if ($installModules)
+		if ($editAllPlugins) 
 		{
-			//$menu->addChild(new JMenuNode(JText::_('Anahita Bazaar'), 'index.php?option=com_socialengine&view=bazaar', 'install'));
-			//$menu->addChild(new JMenuNode(JText::_('Install/Uninstall'), 'index.php?option=com_installer', 'install'));
-			$menu->addSeparator();
-			if ($editAllModules) {
-				$menu->addChild(new JMenuNode(JText::_('Module Manager'), 'index.php?option=com_modules', 'module'),true);
-				$menu->addChild(new JMenuNode(JText::_('Site Modules'),'index.php?option=com_modules&client=0'));
-				$menu->addChild(new JMenuNode(JText::_('Admin Modules'),'index.php?option=com_modules&client=1'));
-				$menu->getParent();
-			}
-			if ($editAllPlugins) {
-				$menu->addChild(new JMenuNode(JText::_('Plugin Manager'), 'index.php?option=com_plugins', 'plugin'));
-			}
-			if ($manageTemplates) {
-				$menu->addChild(new JMenuNode(JText::_('Template Manager'), 'index.php?option=com_templates', 'themes'),true);
-				$menu->addChild(new JMenuNode(JText::_('Site Templates'),'index.php?option=com_templates&client=0'));
-				$menu->addChild(new JMenuNode(JText::_('Admin Templates'),'index.php?option=com_templates&client=1'));
-				$menu->getParent();
-			}
-			if ($manageLanguages) {
-				$menu->addChild(new JMenuNode(JText::_('Language Manager'), 'index.php?option=com_languages', 'language'));
-			}
-		}
+			$menu->addChild(new JMenuNode(JText::_('Extend')), true);
 		
-		if ($installModules && $editAllComponents) {
-			$menu->addSeparator();
+			if ($editAllPlugins)
+				$menu->addChild(new JMenuNode(JText::_('Plugin Manager'), 'index.php?option=com_plugins', 'plugin'));
+			
+			if ($manageTemplates) 
+			{
+				$menu->addChild(new JMenuNode(JText::_('Template Manager'), 'index.php?option=com_templates', 'themes'),true);
+				$menu->getParent();
+			}
+			
+			if ($manageLanguages)
+				$menu->addChild(new JMenuNode(JText::_('Language Manager'), 'index.php?option=com_languages', 'language'));
 		}
 		
 		if ($editAllComponents)
 		{
-
+			$menu->addSeparator();
+			
 			$query = 'SELECT *' .
 				' FROM #__components' .
-				' WHERE '.$db->NameQuote( 'option' ).' <> "com_frontpage"' .
-				' AND enabled = 1' .
+				' WHERE enabled = 1' .
 				' ORDER BY ordering, name';
+			
 			$db->setQuery($query);
 			$comps = $db->loadObjectList(); // component list
 			$subs = array(); // sub menus
@@ -214,22 +141,13 @@ class RTMenuHelper {
 			}
 		}
 		
-		if ($installModules || $editAllComponents) {
+		if ($editAllPlugins || $editAllComponents) {
 			$menu->getParent();
 		}
 		
 		if ($canConfig) {
 			$menu->addChild(new JMenuNode(JText::_('Configure'), 'index.php?option=com_config', 'config'));
 		}
-
-		/*
-		 * Help SubMenu
-		 */
-// 		$menu->addChild(new JMenuNode(JText::_('Help')), true);
-// 		$menu->addChild(new JMenuNode(JText::_('Anahita Help'), 'http://www.anahitapolis.com', 'help'));
-// 		$menu->addChild(new JMenuNode(JText::_('System Info'), 'index.php?option=com_admin&task=sysinfo', 'info'));
-
-		//$menu->getParent();
 
 		$menu->renderMenu('mctrl-menu', 'menutop level1');
 	}
@@ -246,8 +164,6 @@ class RTMenuHelper {
 		$usertype = $user->get('usertype');
 
 		$canConfig			= $user->authorize('com_config', 'manage');
-		$installModules		= $user->authorize('com_installer', 'module');
-		$editAllModules		= $user->authorize('com_modules', 'manage');
 		$installPlugins		= $user->authorize('com_installer', 'plugin');
 		$editAllPlugins		= $user->authorize('com_plugins', 'manage');
 		$installComponents	= $user->authorize('com_installer', 'component');
@@ -269,14 +185,8 @@ class RTMenuHelper {
 			$menu->addChild(new JMenuNode(JText::_('Users'), null, 'disabled'));
 		}
 
-		// Articles SubMenu
-		$menu->addChild(new JMenuNode(JText::_('Articles'), null, 'disabled daddy'));
-		
-		// Menus SubMenu
-		$menu->addChild(new JMenuNode(JText::_('Menus'), null, 'disabled daddy'));
-
 		// Extend SubMenu
-		if ($installComponents || $installModules) {
+		if ($installComponents || $editAllPlugins) {
 			$menu->addChild(new JMenuNode(JText::_('Extend'), null, 'disabled daddy'));
 		}
 
@@ -285,20 +195,14 @@ class RTMenuHelper {
 			$menu->addChild(new JMenuNode(JText::_('Configure'),  null, 'disabled'));
 		}
 
-		// Help SubMenu
-		$menu->addChild(new JMenuNode(JText::_('Help'),  null, 'disabled daddy'));
-
 		$menu->renderMenu('menu', 'menutop level1 disabled');
 	}
 	
 	function __construct() {
 		// menu data
-		$menus['Dashboard'] = array('com_content','com_trash:task=viewContent','com_sections:scope=content','com_categories:section=com_content','com_frontpage');
-		$menus['Articles'] = array('com_menus','com_trash:task=viewMenu');
 		$menus['Users'] = array('com_users');
-		$menus['Extend'] = array('com_installer','com_modules','com_plugins','com_templates','com_languages','com_search');
+		$menus['Extend'] = array('com_plugins','com_templates','com_languages');
 		$menus['Config'] = array('com_config');
-		$menus['Help'] = array('com_admin:task=help','com_admin:task=sysinfo');
 		$menus['Tools'] = array('com_checkin','com_cache');
 		
 		$this->menudata = $menus;

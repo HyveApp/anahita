@@ -25,9 +25,7 @@ class ConfigApplicationView
 	{
 		global $mainframe;
 
-		// Load tooltips behavior
-		JHTML::_('behavior.tooltip');
-		JHTML::_('behavior.switcher');
+		
 
 		// Load component specific configurations
 		$table =& JTable::getInstance('component');
@@ -41,10 +39,6 @@ class ConfigApplicationView
 		require_once($tmplpath.DS.'navigation.php');
 		$contents = ob_get_contents();
 		ob_end_clean();
-
-		// Set document data
-		$document =& JFactory::getDocument();
-		$document->setBuffer($contents, 'modules', 'submenu');
 
 		// Load settings for the FTP layer
 		jimport('joomla.client.helper');
