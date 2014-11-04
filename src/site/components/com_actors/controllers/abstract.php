@@ -122,7 +122,10 @@ abstract class ComActorsControllerAbstract extends ComBaseControllerService
             }
         }
         
-        $entities->order('created_on', 'desc');
+        if (!$this->order) 
+        {
+            $entities->order('created_on', 'desc');
+        }
                 
         return $this->setList($entities)->getList();
     }
