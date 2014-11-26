@@ -76,6 +76,38 @@ class ComConnectControllerLogin extends ComBaseControllerResource
         
         $context->response->setRedirect(JRoute::_('option=com_connect&view=login'));
     }
+
+    /*
+    * Login via third party (facebook/twitter)
+	*/
+	protected function _actionPost($context)
+	{
+		if( isset($_POST["oauth_handler"]) && isset($_POST["oauth_token"]) && isset($_POST["profile_id"]) )
+		{
+	        $session = $this->getService('repos://site/connect.session')
+	            ->find(array(
+	                    'owner.type'  => 'com:people.domain.entity.person',
+	                    'profileId'   => $_POST["profile_id"],
+	                    'api'         => $_POST["oauth_handler"]
+	                ));
+            if ( $session ) {
+				$this->getService('com://site/people.controller.person', 
+					        array('response'=>$context->response))
+					         ->setItem($session->owner)->login();
+
+				$person = $this->getService('repos://site/people.person')->find(array('id'=>$session->owner->id))->toSerializableArray();
+		    	header('Content-Type: application/json');
+		    	header('HTTP/1.1 201 CREATED');
+		    	echo json_encode( $person );
+            }
+            else {
+            	return false;
+            }
+        }
+        else {
+        	return false;
+        }
+	}
     
 	/**
 	 * Redners the login form
