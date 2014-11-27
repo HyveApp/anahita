@@ -77,35 +77,71 @@ class ComConnectControllerLogin extends ComBaseControllerResource
         $context->response->setRedirect(JRoute::_('option=com_connect&view=login'));
     }
 
-    /*
-    * Login via third party (facebook/twitter)
+    /**
+     * Login via third party (facebook/twitter)
+     *
+     * @param KCommandContext $context Context parameter
+     * @param void
 	*/
 	protected function _actionPost($context)
 	{
-		if( isset($_POST["oauth_handler"]) && isset($_POST["oauth_token"]) && isset($_POST["profile_id"]) )
+		$context->response->setContentType('application/json');
+		if( isset($_POST["oauth_handler"]) && isset($_POST["oauth_token"]) && isset($_POST["profile_id"]) && isset($_POST["oauth_secret"]))
 		{
-	        $session = $this->getService('repos://site/connect.session')
-	            ->find(array(
-	                    'owner.type'  => 'com:people.domain.entity.person',
-	                    'profileId'   => $_POST["profile_id"],
-	                    'api'         => $_POST["oauth_handler"]
-	                ));
-            if ( $session ) {
-				$this->getService('com://site/people.controller.person', 
-					        array('response'=>$context->response))
-					         ->setItem($session->owner)->login();
+			/* link facebook/twitter accout with hyve accout if the request is passing owner_id, 
+			   else login use facebook/twitter */
+			if(isset($_POST["owner_id"])) {
+				$session = $this->getService('repos://site/connect.session')
+					->findOrAddNew(array(
+		                    'owner.type'  => 'com:people.domain.entity.person',
+		                    'profileId'   => $_POST["profile_id"],
+		                    'api'         => $_POST["oauth_handler"]
+						));
 
-				$person = $this->getService('repos://site/people.person')->find(array('id'=>$session->owner->id))->toSerializableArray();
-		    	header('Content-Type: application/json');
-		    	header('HTTP/1.1 201 CREATED');
-		    	echo json_encode( $person );
-            }
-            else {
-            	return false;
-            }
+				$person = $this->getService('repos://site/people.person')
+										->find(array('id'=>$_POST["owner_id"]));	
+
+	            $session->setData(array(
+	                'component' 	=> 'com_connect',
+	                'owner' 		=> $person,
+	                'tokenKey' 		=> $_POST["oauth_token"],
+	                'tokenSecret'	=> $_POST["oauth_secret"]
+	            ));                        
+	            $session->save();  
+				$context->response->setStatus(201);
+				$context->response->setContent("Third Party Account Linked Successfully");
+			}
+			else {
+		        $session = $this->getService('repos://site/connect.session')
+		            ->find(array(
+		                    'owner.type'  => 'com:people.domain.entity.person',
+		                    'profileId'   => $_POST["profile_id"],
+		                    'api'         => $_POST["oauth_handler"]
+		                ));
+	            if ( $session ) {
+					$this->getService('com://site/people.controller.person', 
+						        array('response'=>$context->response))
+						         ->setItem($session->owner)->login();
+
+
+					$session->set('tokenKey', $_POST["oauth_token"]);
+					$session->set('tokenSecret', $_POST["oauth_secret"]);
+					$session->save();
+
+					$person = $this->getService('repos://site/people.person')
+										->find(array('id'=>$session->owner->id))->toSerializableArray();
+			    		
+			    	$context->response->setStatus(201);
+					$context->response->setContent(json_encode( $person ));
+
+	            }
+	            else {
+	            	$context->response->setStatus(401, "User Doesn't Exist");
+	            }
+	        }
         }
         else {
-        	return false;
+        	$context->response->setStatus(400, "Missing Parameters");
         }
 	}
     
