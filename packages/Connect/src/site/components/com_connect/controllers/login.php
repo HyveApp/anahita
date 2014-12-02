@@ -108,8 +108,16 @@ class ComConnectControllerLogin extends ComBaseControllerResource
 	                'tokenSecret'	=> $_POST["oauth_secret"]
 	            ));                        
 	            $session->save();  
-				$context->response->setStatus(201);
-				$context->response->setContent("Third Party Account Linked Successfully");
+				
+				$this->getService('com://site/people.controller.person', 
+						        array('response'=>$context->response))
+						         ->setItem($session->owner)->login();
+				$person = $this->getService('repos://site/people.person')
+										->find(array('id'=>$session->owner->id))->toSerializableArray();
+			    
+			    $context->response->setStatus(201);
+				$context->response->setContent(json_encode( $person ));
+				
 			}
 			else {
 		        $session = $this->getService('repos://site/connect.session')
