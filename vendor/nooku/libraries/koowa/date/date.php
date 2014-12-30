@@ -257,7 +257,7 @@ class KDate extends KObject
     {
         $timezone = $_GET["timezone"];
         if($timezone)
-            date_default_timezone_set("UTC");
+            date_default_timezone_set("America/Vancouver");
         $timestamp = mktime( $this->hour, $this->minute, $this->second, $this->month, $this->day, $this->year );
         if($timezone)
             date_default_timezone_set($timezone);
