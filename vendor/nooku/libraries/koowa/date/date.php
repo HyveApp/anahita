@@ -255,7 +255,12 @@ class KDate extends KObject
      */
     public function format( $format )
     {
+        $timezone = $_GET["timezone"];
+        if($timezone)
+            date_default_timezone_set("UTC");
         $timestamp = mktime( $this->hour, $this->minute, $this->second, $this->month, $this->day, $this->year );
+        if($timezone)
+            date_default_timezone_set($timezone);
         return strftime( $format, $timestamp );
     }
 
