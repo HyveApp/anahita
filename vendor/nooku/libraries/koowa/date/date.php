@@ -257,7 +257,7 @@ class KDate extends KObject
     {
         $timezone = $_GET["timezone"];
         if($timezone)
-            date_default_timezone_set("America/Vancouver");
+            date_default_timezone_set("UTC");
         $timestamp = mktime( $this->hour, $this->minute, $this->second, $this->month, $this->day, $this->year );
         if($timezone)
             date_default_timezone_set($timezone);
@@ -269,6 +269,55 @@ class KDate extends KObject
         $timestamp = mktime( $this->hour, $this->minute, $this->second, $this->month, $this->day, $this->year );
         return $timestamp;
     }
+
+
+    /**
+     * Set the Date object using array
+     */
+    public function setDateArray($array)
+    {
+        $this->year         = isset($array["year"])?$array["year"]:0;
+        $this->month        = isset($array["month"])?$array["month"]:0;
+        $this->day          = isset($array["day"])?$array["day"]:0;
+        $this->hour         = isset($array["hour"])?$array["hour"]:0;
+        $this->minute       = isset($array["minute"])?$array["minute"]:0;
+        $this->second       = isset($array["second"])?$array["second"]:0;
+
+        return $this;
+    }
+
+
+    /**
+     * Returns Date as Array
+     */
+    public function getDateArray()
+    {
+        $array              = array();
+        $array["year"]      = $this->year;
+        $array["month"]     = $this->month;
+        $array["day"]       = $this->day;
+        $array["hour"]      = $this->hour;
+        $array["minute"]    = $this->minute;
+        $array["second"]    = $this->second;
+
+        return $array;
+    }
+
+
+    /**
+     * Convert to UTC timezone
+     */
+    public function convertToUTC($timezone)
+    {
+        date_default_timezone_set($timezone);
+        $timestamp = mktime( $this->hour, $this->minute, $this->second, $this->month, $this->day, $this->year );
+        date_default_timezone_set("UTC");
+        $date = strftime( '%Y-%m-%d %H:%M:%S', $timestamp );
+        $this->setDate($date);
+
+        return $this;
+    }
+
 
     /**
      * Set the year field of the date object
