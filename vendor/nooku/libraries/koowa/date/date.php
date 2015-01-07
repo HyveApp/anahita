@@ -107,10 +107,10 @@ class KDate extends KObject
      *
      * @see setDate()
      * @param object    An optional KConfig object with configuration options
-                        Recognized key values include 'date'
+     *                  Recognized key values include 'date'
      * @return KDate The new Date object
      */
-    public function __construct( KConfig $config = null)
+    public function __construct( KConfig $config = null )
     { 
         //If no config is passed create it
         if(!isset($config)) $config = new KConfig();
@@ -196,31 +196,32 @@ class KDate extends KObject
      * @param int $format format constant (DATE_FORMAT_*) of the output date
      * @return string the date in the requested format
      */
-    public function getDate( $format = DATE_FORMAT_ISO )
+    public function getDate( $format = DATE_FORMAT_ISO , $fromTimezone = "UTC" )
     {
+
         switch ($format)
         {
             case DATE_FORMAT_ISO:
-                return $this->format( '%Y-%m-%d %H:%M:%S' );
+                return $this->format( '%Y-%m-%d %H:%M:%S', $fromTimezone );
                 break;
 
             case DATE_FORMAT_ISO_BASIC:
                 $format = '%Y%m%dT%H%M%S';
-                return $this->format($format);
+                return $this->format($format, $fromTimezone);
                 break;
 
             case DATE_FORMAT_ISO_EXTENDED:
                 $format = '%Y-%m-%dT%H:%M:%S';
-                return $this->format($format);
+                return $this->format($format, $fromTimezone);
                 break;
 
             case DATE_FORMAT_ISO_EXTENDED_MICROTIME:
                 $format = '%Y-%m-%dT%H:%M:%s';
-                return $this->format($format);
+                return $this->format($format, $fromTimezone);
                 break;
 
             case DATE_FORMAT_TIMESTAMP:
-                return $this->format( '%Y%m%d%H%M%S' );
+                return $this->format( '%Y%m%d%H%M%S', $fromTimezone);
                 break;
 
             case DATE_FORMAT_UNIXTIME:
@@ -228,7 +229,7 @@ class KDate extends KObject
                 break;
 
             default:
-                return $this->format( $format );
+                return $this->format( $format, $fromTimezone );
                 break;
         }
     }
@@ -253,11 +254,11 @@ class KDate extends KObject
     /**
      * Formats the date
      */
-    public function format( $format )
+    public function format( $format, $fromTimezone = "UTC" )
     {
         $timezone = $_GET["timezone"];
         if($timezone)
-            date_default_timezone_set("UTC");
+            date_default_timezone_set($fromTimezone);
         $timestamp = mktime( $this->hour, $this->minute, $this->second, $this->month, $this->day, $this->year );
         if($timezone)
             date_default_timezone_set($timezone);
