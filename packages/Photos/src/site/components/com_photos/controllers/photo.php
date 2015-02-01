@@ -73,12 +73,32 @@ class ComPhotosControllerPhoto extends ComMediumControllerDefault
 	 * @return void
 	 */
 	protected function _actionBrowse($context)
-	{		
+	{
 		$this->getService('repos://site/photos.set');
 
 		$photos =  parent::_actionBrowse($context);
-		
-		$photos->order('creationTime', 'DESC');
+
+		$timezone = isset($_GET["timezone"]) ? $_GET["timezone"] : "America/Vancouver";
+		$adminArea = isset($_GET["adminArea"]) ? $_GET["adminArea"] : "Greater Vancouver";
+
+		date_default_timezone_set($timezone);
+		$now = new KDate();
+		$hour = $now->hour;
+		if($hour>=11 && $hour<=23){
+			$start = $now->year."-".$now->month."-".$now->day." 11:00:00";
+			$next_day = date('Y-m-d', strtotime('+1 day'));
+			$end = 	$next_day." 11:00:00";
+		}
+		else{
+			$preve_day = date('Y-m-d', strtotime('-1 day'));
+			$start = $preve_day." 11:00:00";
+			$end = $now->year."-".$now->month."-".$now->day." 11:00:00";
+		}
+
+		$photos->where('adminArea', 'LIKE', $adminArea);
+		$photos->where('creationTime', '>', $start);
+		$photos->where('creationTime', '<', $end);
+		$photos->order('creationTime', 'DESC');		
 		
 		if($this->exclude_set != '')
 		{
@@ -105,15 +125,15 @@ class ComPhotosControllerPhoto extends ComMediumControllerDefault
 	 * @return void
 	 */
 	protected function _actionAdd($context)
-	{		
-		$data = $context->data;			
+	{	
+		$data = $context->data;		
 		$file = KRequest::get('files.file', 'raw');
 		$content = @file_get_contents($file['tmp_name']);
 		$filesize = strlen($content);
 		$uploadlimit = $this->_max_upload_limit * 1024 * 1024; 
 		
 		$exif = (function_exists('exif_read_data')) ? @exif_read_data($file['tmp_name']) : array();
-		
+
 		if($filesize == 0)
 		{
 		    throw new LibBaseControllerExceptionBadRequest('File is missing');	
@@ -127,13 +147,16 @@ class ComPhotosControllerPhoto extends ComMediumControllerDefault
 
 		    return;
 		}
-		
+
 		$orientation = 0;
 		
 		if(!empty($exif) && isset($exif['Orientation']) ) 
-			$orientation = $exif['Orientation'];		
-		
+			$orientation = $exif['Orientation'];
 		$data['portrait']  = array('data'=>$content,'rotation'=>$orientation,'mimetype'=>isset($file['type']) ? $file['type'] : null);				
+		
+		if(!isset($data["adminArea"])) $data["adminArea"] = "Greater Vancouver";
+		if(!isset($data["timezone"])) $data["timezone"] = "America/Vancouver";
+		
 		$photo = $this->actor->photos->addNew($data);	
 		$photo->setExifData($exif);
 		$photo->save();
