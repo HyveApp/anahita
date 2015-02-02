@@ -78,26 +78,27 @@ class ComPhotosControllerPhoto extends ComMediumControllerDefault
 
 		$photos =  parent::_actionBrowse($context);
 
-		$timezone = isset($_GET["timezone"]) ? $_GET["timezone"] : "America/Vancouver";
-		$adminArea = isset($_GET["adminArea"]) ? $_GET["adminArea"] : "Greater Vancouver";
+		if ( $this->filter == 'daily' ) {
+            $timezone = isset($_GET["timezone"]) ? $_GET["timezone"] : "America/Vancouver";
 
-		date_default_timezone_set($timezone);
-		$now = new KDate();
-		$hour = $now->hour;
-		if($hour>=11 && $hour<=23){
-			$start = $now->year."-".$now->month."-".$now->day." 11:00:00";
-			$next_day = date('Y-m-d', strtotime('+1 day'));
-			$end = 	$next_day." 11:00:00";
-		}
-		else{
-			$preve_day = date('Y-m-d', strtotime('-1 day'));
-			$start = $preve_day." 11:00:00";
-			$end = $now->year."-".$now->month."-".$now->day." 11:00:00";
-		}
+			date_default_timezone_set($timezone);
+			$now = new KDate();
+			$hour = $now->hour;
+			if($hour>=11 && $hour<=23){
+				$start = $now->year."-".$now->month."-".$now->day." 11:00:00";
+				$next_day = date('Y-m-d', strtotime('+1 day'));
+				$end = 	$next_day." 11:00:00";
+			}
+			else{
+				$preve_day = date('Y-m-d', strtotime('-1 day'));
+				$start = $preve_day." 11:00:00";
+				$end = $now->year."-".$now->month."-".$now->day." 11:00:00";
+			}
 
-		$photos->where('adminArea', 'LIKE', $adminArea);
-		$photos->where('creationTime', '>', $start);
-		$photos->where('creationTime', '<', $end);
+			$photos->where('creationTime', '>', $start);
+			$photos->where('creationTime', '<', $end);
+        }
+
 		$photos->order('creationTime', 'DESC');		
 		
 		if($this->exclude_set != '')
@@ -152,10 +153,7 @@ class ComPhotosControllerPhoto extends ComMediumControllerDefault
 		
 		if(!empty($exif) && isset($exif['Orientation']) ) 
 			$orientation = $exif['Orientation'];
-		$data['portrait']  = array('data'=>$content,'rotation'=>$orientation,'mimetype'=>isset($file['type']) ? $file['type'] : null);				
-		
-		if(!isset($data["adminArea"])) $data["adminArea"] = "Greater Vancouver";
-		if(!isset($data["timezone"])) $data["timezone"] = "America/Vancouver";
+		$data['portrait']  = array('data'=>$content,'rotation'=>$orientation,'mimetype'=>isset($file['type']) ? $file['type'] : null);
 		
 		$photo = $this->actor->photos->addNew($data);	
 		$photo->setExifData($exif);
