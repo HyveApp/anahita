@@ -196,7 +196,7 @@ class KDate extends KObject
      * @param int $format format constant (DATE_FORMAT_*) of the output date
      * @return string the date in the requested format
      */
-    public function getDate( $format = DATE_FORMAT_ISO , $fromTimezone = "UTC")
+    public function getDate( $format = DATE_FORMAT_ISO , $fromTimezone = null)
     {
 
         switch ($format)
@@ -254,13 +254,13 @@ class KDate extends KObject
     /**
      * Formats the date
      */
-    public function format( $format, $fromTimezone = "UTC")
+    public function format( $format, $fromTimezone = null)
     {
         $timezone = $_GET["timezone"];
-        if($timezone)
+        if($timezone && $fromTimezone)
             date_default_timezone_set($fromTimezone);
         $timestamp = mktime( $this->hour, $this->minute, $this->second, $this->month, $this->day, $this->year );
-        if($timezone)
+        if($timezone && $fromTimezone)
             date_default_timezone_set($timezone);
         return strftime( $format, $timestamp );
     }

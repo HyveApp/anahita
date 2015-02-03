@@ -55,11 +55,7 @@ class ComPhotosDomainEntityPhoto extends ComMediumDomainEntityMedium
 	protected function _initialize(KConfig $config)
 	{
 		$config->append(array(
-			'attributes' 	=> array(
-				'mimetype'  => 'mimetype',
-				'timezone'  => 'timezone',
-				'adminArea' => 'administrative_area',
-			),
+			'attributes' 	=> array( 'mimetype' ),
 			'behaviors'		=> array(
 				'portraitable',			
 			),
