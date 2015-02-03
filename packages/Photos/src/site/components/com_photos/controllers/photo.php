@@ -95,6 +95,12 @@ class ComPhotosControllerPhoto extends ComMediumControllerDefault
 				$end = $now->year."-".$now->month."-".$now->day." 11:00:00";
 			}
 
+			//convert times to UTC; becuase times in db is in UTC
+			$start = (new KDate)->setDate($start);
+			$end = (new KDate)->setDate($end);
+			$start = $start->convertToUTC($timezone)->getDate();
+			$end = $end->convertToUTC($timezone)->getDate();
+
 			$photos->where('creationTime', '>', $start);
 			$photos->where('creationTime', '<', $end);
         }
