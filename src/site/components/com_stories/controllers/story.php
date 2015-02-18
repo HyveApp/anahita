@@ -88,7 +88,8 @@ class ComStoriesControllerStory extends ComBaseControllerService
      */
 	protected function _actionBrowse($context)
 	{				   
-		$query = $this->getRepository()->getQuery()->limit(20, $this->start );
+		$limit = $this->limit > 0 ? $this->limit : 20;
+        $query = $this->getRepository()->getQuery()->limit($limit, $this->start);
 
         if($this->filter == 'leaders') 
         {
