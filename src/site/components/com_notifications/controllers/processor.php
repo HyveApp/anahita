@@ -202,6 +202,7 @@ class ComNotificationsControllerProcessor extends ComBaseControllerResource
             $data = new KConfig($this->_parser->parse($notification));
 
             $message = trim(strip_tags(pick($data->email_subject, $data->title)));
+            $message = str_replace("the", "a", $message);
             $push_notification = $this->getService('com://site/hive.notification', array('person'=>$person));
             if ($push_notification && $message) {
                 $push_notification->sendNotify($message);
