@@ -136,6 +136,7 @@ class ComNotificationsControllerProcessor extends ComBaseControllerResource
         
         $settings = AnHelperArray::indexBy($settings, 'person.id');
         
+        $this->_sendPushNotifications(array('notification'=>$notification,'people'=>$people, 'settings'=>$settings));
         $mails = $this->_renderMails(array('notification'=>$notification,'people'=>$people, 'settings'=>$settings));
         $debug = $this->getBehavior('mailer')->getTestOptions()->enabled;
         
@@ -168,6 +169,45 @@ class ComNotificationsControllerProcessor extends ComBaseControllerResource
         foreach($mails as $mail)
             $this->mail($mail);
     }    
+
+    /**
+     * Sends push notifications for a list of people
+     *
+     * @param array $config Config parameter
+     *
+     * @return array
+     */
+    protected function _sendPushNotifications($config)
+    {
+        $config = new KConfig($config);
+        $settings = $config->settings;
+        $people = $config->people;
+        $notification = $config->notification;
+        
+        foreach($people as  $person)
+        {
+            $setting = $settings->{$person->id};
+    
+            if(!$ret = $notification->shouldNotify($person, $setting)) 
+            {
+                $notification->removeSubscribers($person);
+                continue;
+            }
+            
+            if($ret !== ComNotificationsDomainDelegateSettingInterface::NOTIFY_WITH_EMAIL)
+                continue;
+            
+            KService::set('com:people.viewer', $person);
+            $notification->owner = $person;
+            $data = new KConfig($this->_parser->parse($notification));
+
+            $message = trim(strip_tags(pick($data->email_subject, $data->title)));
+            $push_notification = $this->getService('com://site/hive.notification', array('person'=>$person));
+            if ($push_notification && $message) {
+                $push_notification->sendNotify($message);
+            }
+        }
+    }
     
 	/**
      * Renders emails for a list of people
