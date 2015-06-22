@@ -1,7 +1,7 @@
 <?php defined('KOOWA') or die('Restricted access'); ?>
 
 <data name="title">
-<?= sprintf(@text('COM-PHOTOS-STORY-NEW-SET-COMMENT'),  @name($subject), @route($object->getURL())) ?>
+<?= sprintf(@text('COM-PHOTOS-STORY-NEW-SET-COMMENT'),  @name($subject), @route($object->getURL().'&permalink='.$comment->id)) ?>
 </data>
 
 <?php if ($type != 'notification') :?>
@@ -12,12 +12,6 @@
     		<?= $object->title ?>
     	</a>
     </h4>
-	<?php endif; ?>
-	
-	<?php if ( $object->hasCover() ) : ?>
-	<a href="<?=@route($object->getURL())?>">
-		<img class="entity-portrait-medium" src="<?= $object->getCoverSource('medium') ?>" />
-	</a>
 	<?php endif; ?>
 	
 	<div class="an-meta">
@@ -37,7 +31,7 @@
         		</a>            
             </td>
             <td valign="top">
-                <?= $comment->body?>
+               <?= nl2br( $comment->body ) ?>
             </td>
     </table>	
 </data>

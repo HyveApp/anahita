@@ -1,5 +1,54 @@
 To view the detailed commits log go to https://github.com/anahitasocial/anahita/commits/master
 
+Anahita 4.1.2 Birth Release
+=============================
+* Upgraded facebook OAth API
+* Upgraded linkedIn OAuth API 
+* fixed inline edit and cancel issue where nested an-entity layers were being created
+* major upgrade of the Subscriptions App. No it isn't ready yet. Wait for the next release.
+* discontinued OpenSocial plugin
+* apps can now be specific to what type of actors they can be assigned to. Subscriptions app can only be assigned to person actors
+
+Anahita 4.1.1 Birth Release
+=============================
+* ability to run the entire site with SSL on
+* fixed infinit scroll bugs in social graph and other entities
+* fixed notification scroll bug
+* fixed permalinks in comment stories and notifications
+* fixed the default list limit bug in the admin back-end
+* lots of development on the Subscriptions app, but sorry it isn't ready for this release yet.
+* removed legacy force_ssl and implemented a global isSSL() auto detection method
+
+Anahita 4.1.0 Birth Release
+=============================
+* all the mootools code has been removed
+* the entire javascript library has been rewritten in JQuery
+* added covers for the actor profiles and coverable behavior to the librariy which can be used for other types of nodes such as locations.
+* improvements to the social graph API
+* removed TinyMCE and instead developed a new lightweight html5 editor that is being used in Topics and Pages apps
+* drag'n drop multiple file uploader in the Photos app
+* improved usability of the user interfaces for mobile users
+* added gist content plugin for sharing code snips
+* simplified and improved the social graph API
+* removed ptag content filter
+* all comments do not support html content. They do however use content filters
+* users can no longer add a and img tags in posts. 
+* added grunt.js file for compressing the js files 
+
+Anahita 4.0.4 Birth Release
+============================
+* removed routing from component configuration form in the admin back-end. The routing was preventing the form to save on some Nginx servers.
+
+Anahita 4.0.3 Birth Release
+============================
+* minor but annoying mistake fixed. The error page wasn't loading the correct analytics template causing the error page to break.
+
+Anahita 4.0.2 Birth Release
+============================
+* removed all JRoute::_ instances for the urls in the admin backend. We did that becuase some Nginx servers had problem routing the urls properly and were landing on 404 pages instead.
+* analytics code is now a layout template inside the templates/base/html/tmpl and it can be customized within your tempalte.
+* minor UI fixes
+
 Anahita 4.0.1 Birth Release
 ============================
 * version number is updated

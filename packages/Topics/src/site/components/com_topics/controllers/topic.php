@@ -27,6 +27,28 @@
  */
 class ComTopicsControllerTopic extends ComMediumControllerDefault
 {
+    /**
+     * Initializes the options for the object
+     *
+     * Called from {@link __construct()} as a first step of object instantiation.
+     *
+     * @param   object  An optional KConfig object with configuration options.
+     * @return  void
+     */
+    protected function _initialize(KConfig $config)
+    {
+        $config->append(array(
+            'request' => array(
+                'sort' => null,               
+            ),
+            'behaviors' => array(
+                'pinnable'
+            )
+        ));
+        
+        parent::_initialize($config);
+    }
+    
 	/**
 	 * Browse Topics
 	 * 
@@ -34,14 +56,11 @@ class ComTopicsControllerTopic extends ComMediumControllerDefault
 	 * 
 	 * @return void
 	 */
-	protected function _actionBrowse($context)
+	protected function _actionBrowse( $context )
 	{	
-		$topics = parent::_actionBrowse($context);
-		
-		if( $this->filter != 'leaders')
-			$topics->order('isSticky', 'DESC');
+		$topics = parent::_actionBrowse( $context );
 			
-		$topics->order('IF(@col(lastCommentTime) IS NULL,@col(creationTime),@col(lastCommentTime))', 'DESC');
+		$topics->order('IF(@col(lastCommentTime) IS NULL, @col(creationTime), @col(lastCommentTime))', 'DESC');
 	}
 	
 	/**
@@ -54,25 +73,18 @@ class ComTopicsControllerTopic extends ComMediumControllerDefault
 	protected function _actionAdd($context)
 	{
 	    $entity = parent::_actionAdd($context);
-	    if ( $entity->owner->isSubscribable() )
+	    
+	    if( $entity->owner->isSubscribable() )
+	    {
     	    $notification = $this->createNotification(array(
-    	        'name'	           => 'topic_add',
-    	        'object'           => $entity,
-    	        'subscribers'      => $entity->owner->subscriberIds->toArray()
+
+    	    	'name' => 'topic_add',
+    	        'object' => $entity,
+    	        'subscribers' => $entity->owner->subscriberIds->toArray()
+    	    
     	    ))->setType('post', array('new_post'=>true));
+	    }
+	        
 	    return $entity;
-	}
-	
-	/**
-	 * Sticks/unstick a topic
-	 *
-	 * @param  KCommandContext $context Context parameter
-	 * 
-	 * @return void
-	 */
-	protected function _actionSticky($context)
-	{
-		$data = $context->data;
-		$this->getItem()->isSticky = $data->is_sticky;				
 	}
 }

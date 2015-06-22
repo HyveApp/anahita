@@ -47,15 +47,18 @@ class LibBaseControllerBehaviorServiceable extends KControllerBehaviorAbstract
         parent::__construct($config);
 
         //inverse of exclude_actions
-        if ( count($config->only) ) 
-        {
-            $actions = (array)$config['only'];            
+        if ( count( $config->only ) ) 
+        {     
+            $actions = (array) $config['only'];            
+            
             $exclude = array();
-            foreach($this->getMethods() as $method) 
+            
+            foreach( $this->getMethods() as $method ) 
             {
                 if ( strpos($method, '_action') === 0 ) 
                 {
                     $action = strtolower(substr($method, 7));  
+                    
                     if ( !in_array($action, $actions) ) {
                         $exclude[] = $action;
                     }                  
@@ -137,15 +140,26 @@ class LibBaseControllerBehaviorServiceable extends KControllerBehaviorAbstract
     protected function _actionBrowse(KCommandContext $context)
     {
     	if(!$context->query)
+        {
             $context->query = $this->getRepository()->getQuery(); 
-    	
+        }
+        
     	$query = $context->query;
         
-        if($this->q)
+        if( $this->q )
+        {
             $query->keyword = $this->getService('anahita:filter.term')->sanitize($this->q);
+        }
     
-        if($this->hasBehavior('parentable') && $this->getParent())
-            $query->parent($this->getParent());
+        if( $this->hasBehavior('parentable') && $this->getParent() )
+        {
+            $query->parent( $this->getParent() );
+        }
+        
+        if( $this->getActor() && $this->hasBehavior('ownable') && $this->hasBehavior('pinnable') )
+        {
+            $query->order('pinned', 'DESC');
+        }
         
         switch($this->sort)
         {

@@ -51,7 +51,6 @@ class RTCore
 
 
         // Set the main class vars to match the call
-        JHTML::_('behavior.mootools');
         $doc =& JFactory::getDocument();
         $this->document = $doc;
         $this->user =& JFactory::getUser();
@@ -128,16 +127,6 @@ class RTCore
     {
         $doc =& $this->document;
         return $doc->addScriptDeclaration($js);
-    }
-
-    function getMooScriptVersion($filename) {
-        global $moo_override;
-
-        if (true || JPluginHelper::isEnabled('system', 'mtupgrade') || $moo_override) {
-            return str_replace('.js','-mt1.2.js',$filename);
-        } else {
-            return $filename;
-        }
     }
 
     function addOverrideStyles()

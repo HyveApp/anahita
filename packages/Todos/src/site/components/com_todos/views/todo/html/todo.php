@@ -1,7 +1,5 @@
 <?php defined('KOOWA') or die('Restricted access') ?>
 
-<?php @commands('toolbar') ?>
-
 <?php $highlight = ($todo->open) ? 'an-highlight' : '' ?>
 <div class="an-entity <?= $highlight ?>">
 	<div class="clearfix">
@@ -19,7 +17,7 @@
 		
 	<?php if($todo->description): ?>
 	<div class="entity-description">
-	<?= @content($todo->description); ?>
+	<?= @content( nl2br($todo->description) ); ?>
 	</div>
 	<?php endif; ?>
 		

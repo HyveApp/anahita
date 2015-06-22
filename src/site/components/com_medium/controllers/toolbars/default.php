@@ -119,6 +119,24 @@ class ComMediumControllerToolbarDefault extends ComBaseControllerToolbarDefault
                 $this->addCommand('commentstatus');
         }
     }
+    
+	/**
+     * Delete Command for an entity
+     *
+     * @param LibBaseTemplateObject $command The action object
+     *
+     * @return void
+     */
+    protected function _commandDelete($command)
+    {
+        $entity = $this->getController()->getItem();
+    
+        $command->append(array('label'=>JText::_('LIB-AN-ACTION-DELETE')))
+        ->href(JRoute::_($entity->getURL()))
+        ->setAttribute('data-action', 'delete')
+        ->setAttribute('data-redirect', JRoute::_($entity->owner->getURL()))
+        ->class('action-delete');
+    }
 
     /**
      * New button toolbar
@@ -135,8 +153,29 @@ class ComMediumControllerToolbarDefault extends ComBaseControllerToolbarDefault
         $labels[] = strtoupper('com-'.$this->getIdentifier()->package.'-toolbar-'.$name.'-new');
         $labels[] = 'New';
         $label = translate($labels);
-        $url   = 'option=com_'.$this->getIdentifier()->package.'&view='.$name.'&oid='.$actor->id.'&layout=add';
-        $command->append(array('label'=>$label))
-                ->href($url);
+        $url = 'option=com_'.$this->getIdentifier()->package.'&view='.$name.'&oid='.$actor->id.'&layout=add';
+        
+        $command
+        ->append(array('label'=>$label))
+        ->href(JRoute::_($url));
+    }
+    
+    /**
+     * Customize the sticky command
+     *
+     * @param LibBaseTemplateObject $command Command Object
+     *
+     * @return void
+     */ 
+    protected function _commandPin($command)
+    {
+        $entity = $this->getController()->getItem();
+        
+        $label  = ( $entity->pinned ) ? JTEXT::_('LIB-AN-ACTION-UNPIN') : JTEXT::_('LIB-AN-ACTION-PIN');
+        
+        $command
+        ->append(array('label'=>$label))
+        ->href( $entity->getURL().'&action='.($entity->pinned ? 'unpin' : 'pin') )
+        ->setAttribute('data-trigger','PostLink');
     }
 }

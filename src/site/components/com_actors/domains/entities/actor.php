@@ -65,6 +65,7 @@ class ComActorsDomainEntityActor extends ComBaseDomainEntityNode
                 'dictionariable',
                 'followable',
 	        	'com://site/hashtags.domain.behavior.hashtagable',
+	        	'coverable',
                 'portraitable' => array(
                         'sizes' => array(
                                 'small'  => '80xauto',
@@ -91,7 +92,7 @@ class ComActorsDomainEntityActor extends ComBaseDomainEntityNode
 	}
 
 	/**
-	 * Return the portrait file for a size
+	 * Return the avatar file for a size
 	 * 
 	 * @see LibBaseDomainBehaviorPortraitable
 	 * 
@@ -110,6 +111,27 @@ class ComActorsDomainEntityActor extends ComBaseDomainEntityNode
         
 		return $filename;
 	}
+    
+    /**
+     * Return the cover file for a size
+     * 
+     * @see LibBaseDomainBehaviorCoverable
+     * 
+     * @return string
+     */
+    public function getCoverFile($size)
+    {
+        if(strpos($this->coverFilename, '/')) 
+        {
+            $cover = str_replace('/', '/covers/'.$size, $this->coverFilename);            
+        } 
+        else 
+        {           
+            $cover = $this->component.'/covers/'.$size.$this->coverFilename;             
+        }
+        
+        return $cover;
+    }
 	
 	/**
 	 * (non-PHPdoc)
@@ -134,5 +156,49 @@ class ComActorsDomainEntityActor extends ComBaseDomainEntityNode
 		{
 			return parent::__get($name);
 		}
+	}
+	
+	/**
+	 * Reset the all graph information for the actors
+	 *
+	 * @param array $actors Array of actors
+	 *
+	 * @return void
+	 */
+	public function resetStats($actors)
+	{            
+	    foreach($actors as $actor)
+	    {
+	        if($actor->isFollowable())
+	        {
+	            $followerIds = $actor->followers->getQuery(true,true)->fetchValues('id');
+	            $actor->set('followerCount', count($followerIds));
+	            $actor->set('followerIds', AnDomainAttribute::getInstance('set')->setData($followerIds));
+	            
+	            $blockedIds = $actor->blockeds->getQuery(true,true)->fetchValues('id');
+	            $actor->set('blockedIds', AnDomainAttribute::getInstance('set')->setData($blockedIds));
+	            
+                $requesterIds = $actor->requesters->getQuery(true,true)->fetchValues('id');
+                $actor->set('followRequesterIds', AnDomainAttribute::getInstance('set')->setData($requesterIds));
+	        }
+	
+	        if($actor->isLeadable())
+	        {
+	            $leaderIds = $actor->leaders->getQuery(true,true)->fetchValues('id');
+	            $actor->set('leaderCount', count($leaderIds));
+	            $actor->set('leaderIds', AnDomainAttribute::getInstance('set')->setData($leaderIds));
+	            
+	            $blockerIds = $actor->blockers->getQuery(true,true)->fetchValues('id');
+	            $actor->set('blockerIds', AnDomainAttribute::getInstance('set')->setData($blockerIds));
+	            
+	            $followerIds = $actor->followers->getQuery(true,true)->fetchValues('id');
+	            
+	            $mutualIds = array_intersect($leaderIds, $followerIds);
+	            
+	            $actor->set('mutualIds', AnDomainAttribute::getInstance('set')->setData($mutualIds));
+	            
+	            $actor->set('mutualCount', count($mutualIds));
+	        }
+	    }
 	}
 }

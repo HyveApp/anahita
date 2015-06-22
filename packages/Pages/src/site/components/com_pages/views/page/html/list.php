@@ -1,7 +1,7 @@
 <?php defined('KOOWA') or die ?>
 
-<?php $published = ($page->isPublished()) ? '' : 'an-highlight' ?>
-<div class="an-entity an-record an-removable <?= $published ?>">
+
+<div class="an-entity <?= ($page->pinned) ? 'an-highlight' : '' ?>">
 	<div class="clearfix">
 		<div class="entity-portrait-square">
 			<?= @avatar($page->author) ?> 
@@ -40,7 +40,7 @@
 		<ul class="an-meta inline">
 			<li><?= sprintf( @text('LIB-AN-MEDIUM-NUMBER-OF-COMMENTS'), $page->numOfComments) ?></li>
 			<?php if(isset($page->editor)) : ?>
-			<li><?= sprintf( @text('LIB-AN-MEDIUM-EDITOR'), @date($page->updateTime), @name($page->editor)) ?></li>
+			<li><?= sprintf( @text('LIB-AN-ENTITY-EDITOR'), @date($page->updateTime), @name($page->editor)) ?></li>
 			<?php endif; ?>
 		</ul>
 	

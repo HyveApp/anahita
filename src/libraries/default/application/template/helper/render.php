@@ -84,12 +84,13 @@ class LibApplicationTemplateHelperRender extends KTemplateHelperAbstract
         $config->append(array(
             'favicon' => pick($this->_params->favicon, 'favicon.ico'),
         	'type' => 'image/png',
+        	'style' => pick($this->_params->cssStyle, 'style1'),
             'url' => 'base://'
         ));
         
         $paths = array(
             JPATH_THEMES.DS.'base'.DS.'css'.DS.'images',
-            JPATH_THEMES.DS.$this->getIdentifier()->package.DS.'css'.DS.'images'
+            JPATH_THEMES.DS.$this->getIdentifier()->package.DS.'css'.DS.$config->style.DS.'images'
         );
         
         $finder = $this->getService('anahita:file.pathfinder');
@@ -111,7 +112,7 @@ class LibApplicationTemplateHelperRender extends KTemplateHelperAbstract
     public function style($config = array())
     {
         require_once 'less/compiler.php';
-        
+
         $config = new KConfig($config);
         
         $config->append(array(
@@ -173,39 +174,5 @@ class LibApplicationTemplateHelperRender extends KTemplateHelperAbstract
         }
         
         return '';
-    }
-    
-    /**
-     * Render a google anayltic 
-     * 
-     * @param array $config Configuration
-     * 
-     * @return string
-     */
-    public function analytics($config = array())
-    {         
-        $config = new KConfig($config);
-        
-        $config->append(array(
-            'gid' => $this->_params->analytics
-        ));
-        
-        $gid = $config->gid;
-        
-        if ( !empty($gid) )  
-        return <<<EOF
-<script type="text/javascript">
-          var _gaq = _gaq || [];
-          _gaq.push(['_setAccount', '$gid']);
-          _gaq.push(['_trackPageview']);
-        
-          (function() {
-            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-          })();
-        </script>        
-EOF;
-        
-    }        
+    }     
 }

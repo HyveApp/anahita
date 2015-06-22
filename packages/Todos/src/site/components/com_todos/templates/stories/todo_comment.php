@@ -1,7 +1,7 @@
 <?php defined('KOOWA') or die('Restricted access');?>
 
 <data name="title">
-	<?= sprintf( @text('COM-TODOS-STORY-NEW-TODO-COMMENT'), @name($subject), @route($object->getURL())) ?>
+	<?= sprintf( @text('COM-TODOS-STORY-NEW-TODO-COMMENT'), @name($subject), @route($object->getURL().'&permalink='.$comment->id)) ?>
 </data>
 
 <data name="body">
@@ -11,7 +11,7 @@
     	</a>
     </h4>
     <div class="entity-body">
-	    <?= @helper('text.truncate', @content($object->body, array('exclude'=>'syntax')), array('length'=>200, 'consider_html'=>true, 'read_more'=>true)); ?>
+	    <?= @helper('text.truncate', @content( nl2br( $object->body ) , array('exclude'=>'gist')), array('length'=>200, 'consider_html'=>true, 'read_more'=>true)); ?>
 	</div>	
 </data>
 

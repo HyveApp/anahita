@@ -3,11 +3,11 @@
 <div class="navbar <?= ($this->getView()->getParams()->navbarInverse) ? 'navbar-inverse' : '' ?> navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container">
-        	<a type="button" class="btn btn-navbar" data-trigger="ShowMainmenu">
+        	<button type="button" class="btn btn-navbar collapsed" data-toggle="collapse" data-target=".menu-mobile">
         		<span class="icon-bar"></span>
         		<span class="icon-bar"></span>
         		<span class="icon-bar"></span>
-        	</a>
+        	</button>
             
 			<?= @render('logo') ?>
             
@@ -16,8 +16,9 @@
 	            <?= @template('menus/main') ?>
 	            <span class="viewer pull-right">
 	            	<?php if(get_viewer()->guest()): ?>
-					<a class="btn btn-primary" data-trigger="BS.showPopup" data-bs-showpopup-url="<?= @route('option=people&view=session&layout=modal&return='.base64_encode(KRequest::url()))?>" >
-    				<?= @text('LIB-AN-ACTION-LOGIN') ?>                                               
+	            	<?php $return = base64UrlEncode( KRequest::url() ); ?>    
+					<a data-trigger="OpenModal" class="btn btn-primary" href="#" data-url="<?= @route('option=people&view=session&layout=modal&connect=1&return='.$return)?>" >
+    				    <?= @text('LIB-AN-ACTION-LOGIN') ?>                                               
 					</a>
 	            	<?php else: ?>
 	            	<?= @template('menus/viewer') ?>
@@ -25,19 +26,9 @@
 	            </span>
             </div>
             
-            <div id="mobile-main-menu" class="hidden-desktop">
+            <div id="mobile-main-menu" class="nav-collapse collapse menu-mobile hidden-desktop">
             <?= @template('menus/mobile') ?>
             </div>
-            
-            <script>
-            document.getElement('#mobile-main-menu ul').hide();
-			Delegator.register('click', {
-				'ShowMainmenu' : function(event, el, api) {
-					event.stop();
-					document.getElement('#mobile-main-menu ul').toggle();
-				},
-			});
-			</script>
         </div>
     </div>            
 </div>

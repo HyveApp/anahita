@@ -1,21 +1,31 @@
 <?php defined('KOOWA') or die; ?>
 
-<?php $socialgraphGadget = $gadgets->extract('socialgraph') ?>
+<?php if(defined('JDEBUG') && JDEBUG ) : ?>
+<script src="com_actors/js/cover.js" />
+<?php else: ?>
+<script src="com_actors/js/min/cover.min.js" />
+<?php endif; ?>
 
-<div class="row" id="actor-profile">
+<?php $socialgraphGadget = $gadgets->extract('socialgraph') ?>   
+
+<?php if( $item->coverSet() ): ?>
+<div class="profile-cover" data-src-large="<?= $item->getCoverURL('large'); ?>" data-src-medium="<?= $item->getCoverURL('medium'); ?>"></div>
+<?php endif; ?>
+
+<div class="row<?= ($item->coverSet()) ? ' has-cover' : '' ?>" id="actor-profile">
 	<div class="span2">
 		<div id="actor-avatar">
 		<?= @avatar($item, 'medium', false) ?>
 		</div>
 		
 		<?php if(count($gadgets) > 1) : ?>	
-		<ul class="nav nav-pills nav-stacked sidelinks" data-behavior="BS.Tabs" data-bs-tabs-options="{'smooth':true,'tabs-selector':'.profile-tab-selector a','sections-selector':'! * .profile-tab-content'}">
+		<ul class="nav nav-pills nav-stacked streams">
 			<li class="nav-header">
             <?=  @text('LIB-AN-STREAMS') ?>
         	</li>
 			<?php foreach($gadgets as $index=>$gadget) : ?>
-			<li class="profile-tab-selector <?= ($index == 'stories') ? 'active' : ''; ?>">
-				<a href="#"><?= $gadget->title ?></a>
+			<li data-stream="<?= $index ?>" class="<?= ($index == 'stories') ? 'active' : ''; ?>">
+				<a href="#<?= $index ?>" data-toggle="tab"><?= $gadget->title ?></a>
 			</li>
 			<?php endforeach;?>
 		</ul>
@@ -23,6 +33,7 @@
 	</div>
 	
 	<div class="span6" id="container-main">
+	
 		<?php if($item->isEnableable() && !$item->enabled): ?>
 		<?= @message(@text('COM-ACTORS-PROFILE-DISABLED-PROMPT'), array('type'=>'warning')) ?>
 		<?php endif; ?>
@@ -30,7 +41,7 @@
 		<?= @helper('ui.toolbar', array()) ?>
 
 		<h2 id="actor-name">
-		<?= @name($item, false) ?>
+		<?= @name($item, false) ?> 
 		<?php if(is_person($item)): ?> 
 		<small>@<?= $item->username ?></small>
 		<?php endif; ?>
@@ -46,14 +57,16 @@
 		<?= @helper('com://site/composer.template.helper.ui.composers', $composers) ?>
 		<?php endif; ?>
 
-		<?php foreach($gadgets as $gadget) : ?>
-		<div class="profile-tab-content">		
-		<?= @helper('ui.gadget', $gadget) ?>
-		</div>		
-		<?php endforeach;?>
+		<div class="tab-content">
+            <?php foreach($gadgets as $index=>$gadget) : ?>
+            <div class="tab-pane fade <?= ($index == 'stories') ? 'active in' : ''; ?>" id="<?= $index ?>">	
+            	<?= @helper('ui.gadget', $gadget) ?>
+            </div>
+            <?php endforeach;?>
+        </div>
 	</div>
 	
-	<div class="span4">
-		<?= @helper('ui.gadget', $socialgraphGadget) ?>	
+	<div class="span4 visible-desktop">
+		  <?= @helper('ui.gadget', $socialgraphGadget) ?>	
 	</div>
 </div>

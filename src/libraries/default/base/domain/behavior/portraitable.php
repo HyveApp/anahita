@@ -102,8 +102,8 @@ class LibBaseDomainBehaviorPortraitable extends LibBaseDomainBehaviorStorable
 	 * @return boolean
 	 */
 	public function portraitSet()
-	{
-		return !empty($this->filename);
+	{   
+		return !empty( $this->filename );
 	}
 	
 	/**

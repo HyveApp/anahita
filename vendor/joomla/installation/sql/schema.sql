@@ -57,6 +57,9 @@ CREATE TABLE `#__anahita_nodes` (
   `actor_gender` varchar(50) DEFAULT NULL,
   `filename` varchar(255) DEFAULT NULL,
   `filesize` int(11) DEFAULT NULL,
+  `cover_filename` varchar(255) DEFAULT NULL,
+  `cover_filesize` int(11) DEFAULT NULL,
+  `cover_mimetype` varchar(100) DEFAULT NULL,
   `status` text,
   `status_update_time` datetime DEFAULT NULL,
   `follower_count` int(11) unsigned DEFAULT NULL,
@@ -123,7 +126,7 @@ CREATE TABLE `#__anahita_nodes` (
   KEY `type_created_on` (`type`,`created_on`),
   KEY `type_status_update_time` (`type`,`status_update_time`),
   KEY `type_default` (`type`,`is_default`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB CHARACTER SET=utf8;
 
 -- --------------------------------------------------------
 
@@ -293,6 +296,6 @@ CREATE TABLE `#__users` (
   KEY `gid_block` (`gid`,`block`),
   KEY `username` (`username`),
   KEY `email` (`email`)
-) ENGINE=MyISAM;
+) ENGINE=MyISAM CHARACTER SET=utf8;
 
 INSERT INTO #__migrator_versions (`version`,`component`) VALUES(3, 'anahita') ON DUPLICATE KEY UPDATE `version` = 3;

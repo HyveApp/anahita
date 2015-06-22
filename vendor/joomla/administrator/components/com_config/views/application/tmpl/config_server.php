@@ -25,6 +25,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' ); ?>
 					<?php echo $lists['error_reporting']; ?>
 				</td>
 			</tr>
+
 		</tbody>
 	</table>
 </fieldset>

@@ -27,6 +27,14 @@
  */
 abstract class ComActorsControllerAbstract extends ComBaseControllerService
 {
+    
+    /**
+     * The max upload limit
+     * 
+     * @var int
+     */
+    protected $_max_upload_limit;
+    
     /** 
      * Constructor.
      *
@@ -41,7 +49,9 @@ abstract class ComActorsControllerAbstract extends ComBaseControllerService
         $this->registerCallback(array('after.delete','after.add'), array($this, 'redirect'));
         
         //set filter state  
-        $this->getState()->insert('filter');            
+        $this->getState()->insert('filter');   
+        
+        $this->_max_upload_limit = $config->max_upload_limit;         
     }
         
     /**
@@ -55,6 +65,10 @@ abstract class ComActorsControllerAbstract extends ComBaseControllerService
      */
     protected function _initialize(KConfig $config)
     {
+        $config->append(array(
+            'max_upload_limit' => ini_get('upload_max_filesize')
+        ));    
+            
         parent::_initialize($config);
         
         $config->append(array(
@@ -68,7 +82,8 @@ abstract class ComActorsControllerAbstract extends ComBaseControllerService
                 'privatable',
                 'enablable',
                 'subscribable',
-        		'com://site/hashtags.controller.behavior.hashtagable'
+        		'com://site/hashtags.controller.behavior.hashtagable',
+        		'coverable'
             ))
         ));
                 
@@ -144,7 +159,11 @@ abstract class ComActorsControllerAbstract extends ComBaseControllerService
         if ($entity->isPortraitable() && KRequest::has('files.portrait')) 
         {
             $file = KRequest::get('files.portrait', 'raw'); 
-            $entity->setPortrait(array('url'=>$file['tmp_name'], 'mimetype'=>$file['type']));             
+            
+           if( $this->bellowSizeLimit( $file ) && $file['error'] == 0 ) 
+            {
+               $entity->setPortrait(array('url'=>$file['tmp_name'], 'mimetype'=>$file['type'])); 
+            }             
         }
         
         return $entity;
@@ -159,13 +178,13 @@ abstract class ComActorsControllerAbstract extends ComBaseControllerService
      */
     protected function _actionEdit(KCommandContext $context)
     {        
-        $entity = parent::_actionEdit($context);
-                
+        $entity = parent::_actionEdit($context);    
+             
         if ($entity->isPortraitable() && KRequest::has('files.portrait')) 
         {         
             $file = KRequest::get('files.portrait', 'raw'); 
             
-            if (!empty($file['size'])) 
+            if( $this->bellowSizeLimit( $file ) && $file['error'] == 0 ) 
             {
                 $this->getItem()->setPortrait(array('url'=>$file['tmp_name'], 'mimetype'=>$file['type']));
                                 
@@ -266,17 +285,17 @@ abstract class ComActorsControllerAbstract extends ComBaseControllerService
      */
     protected function _actionSetPrivacy(KCommandContext $context)
     {
-        //call the parent privactable behavior
         if($this->hasBehavior('privatable'))
-            $this->getBehavior('privatable')->execute('action.setprivacy', $context);
-        
-        //now set the follow request
+        {
+           $this->getBehavior('privatable')->execute('action.setprivacy', $context); 
+        }
+
         $data = $context->data;
         
-        //if access is not followers
-        //then set the allowFollowRequest to false
         if($data->access != 'followers')
-            $data->allowFollowRequest = false;
+        {
+           $data->allowFollowRequest = false; 
+        }  
         
         $this->getItem()->allowFollowRequest = (bool) $data->allowFollowRequest;
     }
@@ -292,18 +311,43 @@ abstract class ComActorsControllerAbstract extends ComBaseControllerService
     {
         $url = null;
         
-        if($context->action == 'delete') 
+        if( $context->action == 'delete' ) 
         {
-            //if deleted then go to back to the general page
             $url = 'option=com_'.$this->getIdentifier()->package.'&view='.KInflector::pluralize($this->getIdentifier()->name);
         }
-        //after add always go to the setting
-        elseif($context->action = 'add') 
+        elseif( $context->action == 'add' ) 
         {
             $url = $context->result->getURL().'&get=settings';
         }
         
         if($url)
-            $context->response->setRedirect(JRoute::_($url));
+        {
+            $context->response->setRedirect(JRoute::_($url)); 
+        }
+    }
+    
+    /**
+     * Checks to see whether the uploaded file exceeds the allowed limit
+     * 
+     * @param posted file request
+     * 
+     * @return boolean
+     */
+    public function bellowSizeLimit( $file ) {
+        
+        $content = @file_get_contents($file['tmp_name']);
+        
+        $filesize = strlen($content);
+        
+        $uploadlimit = $this->_max_upload_limit * 1024 * 1024; 
+        
+        if($filesize > $uploadlimit)
+        {
+            throw new LibBaseControllerExceptionBadRequest('Exceed maximum size');  
+
+            return false;
+        }
+        
+        return true;
     }
 }

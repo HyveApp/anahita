@@ -1,7 +1,7 @@
 <?php defined('KOOWA') or die('Restricted access');?>
 
 <data name="title">		
-	<?= sprintf(@text('COM-TOPICS-STORY-COMMENT'), @name($subject), @route($object->getURL())); ?>
+	<?= sprintf(@text('COM-TOPICS-STORY-COMMENT'), @name($subject), @route($object->getURL().'&permalink='.$comment->id)); ?>
 </data>
 
 <data name="body">	 
@@ -9,8 +9,9 @@
     	<?= @link($object)?>
     </h4>
     <div class="entity-body">
-	    <?= @helper('text.truncate',  @content($object->body, array('exclude'=>'syntax')), array('length'=>200, 'read_more'=>true, 'consider_html'=>true)); ?>
-	</div>	
+        <?php $body = @content( $object->body, array('exclude'=>'gist')); ?>
+        <?= @helper('text.truncate', $body, array('length'=>200, 'read_more'=>true, 'consider_html'=>true)); ?>
+    </div>	
 </data>
 
 <?php if ($type == 'notification') :?>

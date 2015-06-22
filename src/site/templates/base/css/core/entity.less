@@ -61,6 +61,19 @@ h4.entity-name,
     h4 { font-size: @baseFontSize + 1 }
 }
 
+.entity-description-wrapper
+{
+  form
+  {
+    padding: 0 10px;
+  }
+}
+
+.entity-cover
+{
+  margin: 0 10px;
+}
+
 .entity-excerpt
 {
     margin: 10px;	
@@ -82,10 +95,16 @@ h4.entity-name,
    padding: 0 10px 0 60px;
 }
 
+form.an-entity
+{
+  padding: 0 10px;
+  margin: 0;
+}
+
 .an-entity
 {
     .clearfix;
-    margin: 20px 0;
+    margin: 10px 0;
     .border-radius(@baseBorderRadius);
     
     &.an-entity-select-option
@@ -99,33 +118,33 @@ h4.entity-name,
     }
     
     .entity-portrait-square
-	{        	        
-	    img
-	    {           
-	        .square(50px);
-	        .border-radius(3px);
-	    }
-	}
+  	{        	        
+  	    img
+  	    {           
+  	        .square(50px);
+  	        .border-radius(3px);
+  	    }
+  	}
     
     .entity-portrait-medium
      {   
          margin: 10px;
      }
 	
-	dl
-    {   
-        .clearfix;
-        font-size: @baseFontSize;
-            
-        dt
-        {
-            float: left;
-        }
-        dd
-        {
-            padding-left: 120px;
-        }
-    }
+  	dl
+      {   
+          .clearfix;
+          font-size: @baseFontSize;
+              
+          dt
+          {
+              float: left;
+          }
+          dd
+          {
+              padding-left: 120px;
+          }
+      }
     
     ul.inline
     {
@@ -156,26 +175,35 @@ h4.entity-name,
 	       border-bottom: 0;
 	    }
     }
-	
-	
-	.media-grid
-    {
-       img.thumbnail
-       {
-          .square(98px);
-       }
-    }
     
     &.masonry
     {
-        .entity-portrait-medium
-        {            
-            margin: 0;
-            
-            img
-            {
-                .border-radius(0);
-            }
+        -moz-column-gap: 15px;
+        -webkit-column-gap: 15px;
+        column-gap: 15px;
+        
+        @media (min-width: 767px) 
+        {
+            -moz-column-count: 2;
+            -webkit-column-count: 2;
+            column-count: 2;
+        }
+        
+        .an-entity
+        {
+            display: inline-block; /* Display inline-block, and absolutely NO FLOATS! */
+            margin-bottom: 0;
+            width: 100%;
+       
+            .entity-portrait-medium
+	        {            
+	            margin: 0;
+	            
+	            img
+	            {
+	                .border-radius(0);
+	            }
+	        }
         }
     }
 }

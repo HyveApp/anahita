@@ -34,27 +34,8 @@ class ComTopicsControllerToolbarTopic extends ComMediumControllerToolbarDefault
 	 */
 	public function addAdministrationCommands()
 	{
-	    $this->addCommand('sticky');
+	    $this->addCommand('pin');
 	
 	    parent::addAdministrationCommands();
-	}
-		
-	/**
-	 * Customize the sticky command
-	 *
-	 * @param LibBaseTemplateObject $command Command Object
-	 *
-	 * @return void
-	 */	
-	protected function _commandSticky($command)
-	{
-		$entity = $this->getController()->getItem();
-		
-		$label  = ( $entity->isSticky ) ? JTEXT::_('COM-TOPICS-TOPIC-REMOVE-STICKY') : JTEXT::_('COM-TOPICS-TOPIC-MAKE-STICKY');
-		
-		$command
-		->append(array('label'=>$label))
-		->href( $entity->getURL().'&action=sticky&is_sticky='.($entity->isSticky ? 0 : 1) )
-		->setAttribute('data-trigger','Submit');
 	}
 }

@@ -5,7 +5,7 @@
  * @package		Controller
  * @copyright (C) 2008 - 2010 rmdStudio Inc. and Peerglobe Technology Inc. All rights reserved.
  * @license     GNU GPLv3 <http://www.gnu.org/licenses/gpl-3.0.html>
- * @link        http://anahitapolis.com
+ * @link        http://www.GetAnahita.com
  */
 
 /**
@@ -28,10 +28,15 @@ class ComSubscriptionsControllerOrder extends ComBaseControllerService
     protected function _initialize(KConfig $config)
     {
         $config->append(array(
-            'behaviors' => array('serviceable'=>array('only'=>'browse'))
+            'behaviors' => array( 
+                'ownable',
+                'serviceable' => array ( 
+                    'read_only' => true
+                    )    
+                )
         ));
     
-        parent::_initialize($config);
+        parent::_initialize( $config );
     }
     
 	/** 
@@ -41,16 +46,15 @@ class ComSubscriptionsControllerOrder extends ComBaseControllerService
 	 * 
 	 * @return void
 	 */
-	protected function _actionBrowse($context)
+	protected function _actionBrowse( $context )
  	{
- 		$viewer = get_viewer();
- 		
-        $this->_state->setList($this->getService('repos://site/subscriptions.order')
-         								->getQuery()
-         								->actorId($viewer->id)
-         								->order('createdOn', 'DESC')
-         								->fetchSet());
+ 	    $entities = parent::_actionBrowse( $context );
+
+        if( isset($this->actor->id) )
+        {
+           $entities->actorId( $this->actor->id ); 
+        }
         
-        return $this->_state->getList();
+        return $entities;
  	}
 }

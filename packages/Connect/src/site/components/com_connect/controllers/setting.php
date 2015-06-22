@@ -62,8 +62,11 @@ class ComConnectControllerSetting extends ComBaseControllerResource
 	{	
 	    $this->getResponse()->status = KHttpResponse::NO_CONTENT;
 	    
-		$token	= $this->getService('repos://site/connect.session')
-		    ->fetchSet(array('owner'=>$this->actor,'api'=>$this->getAPI()->getName()));		
+		$token	= $this->getService('repos://site/connect.session')->fetchSet(array( 
+						'owner' => $this->actor,
+						'api' => $this->getAPI()->getName()
+		            ));
+		            		
 		$token->delete()->save();
 	}
 	
@@ -77,22 +80,33 @@ class ComConnectControllerSetting extends ComBaseControllerResource
 	protected function _actionGetaccesstoken(KCommandContext $context)
 	{
 	    $data = $context->data;
-		$this->getBehavior('oauthorizable')->execute('action.getaccesstoken', $context);				
-		$user	 = $this->getAPI()->getUser();
-		$session = $this->getService('repos://site/connect.session')->findOrAddNew(array('profileId'=>$user->id,'api'=>$this->getAPI()->getName()));
-        $token   = $this->getAPI()->getToken();
-        if (!empty($token) ) 
+        
+		$this->getBehavior('oauthorizable')->execute('action.getaccesstoken', $context);
+						
+		$user = $this->getAPI()->getUser();
+		
+		$session = $this->getService('repos://site/connect.session')->findOrAddNew( array( 'profileId'=>$user->id,'api'=>$this->getAPI()->getName() ) );
+        
+        $token = $this->getAPI()->getToken();
+        
+        if ( !empty( $token ) ) 
         {
             $session->setData(array(
+                
                 'component' => 'com_connect',
                 'owner'     => $this->actor
-            ))->setToken($token)->save();
+                
+            ))->setToken( $token )->save();
         }
-        $route = JRoute::_($this->actor->getURL().'&get=settings&edit=connect');
-        if ( $data->return ) {
-            $route = base64_decode($data->return);
+        
+        $route = JRoute::_( $this->actor->getURL().'&get=settings&edit=connect' );
+        
+        if ( $data->return ) 
+        {
+            $route = base64_decode( $data->return );
         }
-		$context->response->setRedirect($route);
+        
+		$context->response->setRedirect( $route );
 	}
 	
 	/**
@@ -118,9 +132,7 @@ class ComConnectControllerSetting extends ComBaseControllerResource
 			     unset($apis[$key] );                
 		}
 
-        $this->apis     = $apis;
+        $this->apis = $apis;
         $this->sessions = $sessions;
 	}
 }
-
-?>

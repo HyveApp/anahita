@@ -5,7 +5,7 @@
  * @package		Controller
  * @copyright (C) 2008 - 2010 rmdStudio Inc. and Peerglobe Technology Inc. All rights reserved.
  * @license     GNU GPLv3 <http://www.gnu.org/licenses/gpl-3.0.html>
- * @link        http://anahitapolis.com
+ * @link        http://www.GetAnahita.com
  */
 
 /**
@@ -22,17 +22,26 @@
 	 * @param 	object 	An optional KConfig object with configuration options
 	 */
 	public function __construct(KConfig $config)
-	{
-		parent::__construct($config);
-				
-		$this->registerCallback(array('before.process','before.payment','before.confirm','before.xpayment', 'layout.payment'), array($this, 'validateUser'));		
-		$this->registerCallback(array('before.process','before.confirm', 'layout.confirm'), array($this, 'validatePayment'));
+	{   
+		parent::__construct($config);      
+                
+		$this->registerCallback( array( 
+		  'before.process',
+		  'before.payment',
+		  'before.confirm',
+		  'before.xpayment', 
+		  'layout.payment' ), 
+		  array( $this, 'validateUser' ) );
+          		
+		$this->registerCallback( array( 
+		  'before.process', 
+		  'before.confirm', 
+		  'layout.confirm'), 
+		  array( $this, 'validatePayment' ) );
 
-		$this->getService('repos://site/people.person')
-		    ->getValidator()
-		    ->addValidation('username','uniqueness')
-		    ->addValidation('email',   'uniqueness')
-		;
+		$this->getService('repos://site/people.person')->getValidator()
+		     ->addValidation('username','uniqueness')
+		     ->addValidation('email',   'uniqueness');
 	}
 	
      /**
@@ -44,10 +53,10 @@
      * @return 	void
      */
 	protected function _initialize(KConfig $config)
-	{
+	{ 
 		$config->append(array(			
 			'behaviors' => to_hash(array(
-				'identifiable' => array('repository'=>'package'),
+				'identifiable' => array('repository' => 'package'),
 				'committable',
 				'validatable'
 			))
@@ -62,24 +71,18 @@
 	 * @param  KCommandContext $context
 	 * @return void
 	 */
-	protected function _actionGet($context)
-	{
+	protected function _actionGet(KCommandContext $context)
+	{    
 		$this->_request->append(array(
 			'layout' => 'default'
 		));
 
 		$this->getCommandChain()->run('layout.'.$this->getRequest()->get('layout'), $context);
 		
-		if ( $this->getRequest()->get('layout') == 'default' ) 
-        {
-			$article_id = get_config_value('subscriptions.tos_article_id');
-			$tos =& JTable::getInstance('content');
-			$tos->load($article_id);
-			$this->tos = $tos;				
-		} 
-		elseif ( $this->getRequest()->get('layout') == 'login' && !$this->viewer->guest() ) 
+		if ( $this->getRequest()->get('layout') == 'login' && !$this->viewer->guest() ) 
 		{
 			$context->response->setRedirect(JRoute::_('option=com_subscriptions&view=signup&layout=payment&id='.$this->getItem()->id));
+			
 			return false;
 		}
 
@@ -93,7 +96,8 @@
 	 */
 	protected function _actionConfirm($context)
 	{
-	    $url = JRoute::_('option=com_subscriptions&view=signup&layout=confirm&id='.$this->getItem()->id);	    
+	    $url = JRoute::_('option=com_subscriptions&view=signup&layout=confirm&id='.$this->getItem()->id);	
+            
 		$context->response->setRedirect($url);
 	}
 	
@@ -105,6 +109,7 @@
 	protected function _actionPayment($context)
 	{
 		$url = JRoute::_('option=com_subscriptions&view=signup&layout=payment&id='.$this->getItem()->id);
+        
 		$context->response->setRedirect($url);
 	}
 
@@ -116,17 +121,17 @@
      */
 	protected function _actionXpayment($context)
 	{
-		$data 	  	  = $context->data;
-		$package  	  = $this->getItem();
+		$data = $context->data;
+		$package = $this->getItem();
 
-		$gateway = $this->getService('com://site/subscriptions.controller.subscription')
-		            ->getGateway();
+		$gateway = $this->getService('com://site/subscriptions.controller.subscription')->getGateway();
+		
 		try 
 		{
 		    $url = $gateway->getAuthorizationURL($this->order->getPayload(),
-		        JRoute::_('option=com_subscriptions&view=signup&action=confirm&xpayment=true&id='.$package->id, true),
-		        JRoute::_('option=com_subscriptions&view=signup&action=cancel&xpayment=true&id='.$package->id, true)
-		        );
+		        JRoute::_( 'option=com_subscriptions&view=signup&action=confirm&xpayment=true&id='.$package->id, true ),
+		        JRoute::_( 'option=com_subscriptions&view=signup&action=cancel&xpayment=true&id='.$package->id, true ) );
+                
 		    $context->response->setRedirect($url, KHttpResponse::SEE_OTHER);
 		} 
 		
@@ -144,10 +149,9 @@
 	 */
 	protected function _actionLogin()
 	{
-	    $this->getService('com://site/people.controller.person',
-	            array('response'=>$this->getResponse()))
-	        ->setItem($this->person)
-	        ->login();
+	    $this->getService('com://site/people.controller.person', array('response'=>$this->getResponse()))
+	         ->setItem($this->person)
+	         ->login();
 	}
 	
 	/**
@@ -158,13 +162,16 @@
      */
     protected function _actionProcess($context)
     {      
-        try {
-            $ret = $this->getService('com://site/subscriptions.controller.subscription')
-                ->setOrder($this->order->cloneEntity())
-                ->add();
-        } catch(ComSubscriptionsDomainPaymentException $exception) 
+        try 
         {
-            $this->setMessage('COM-SUB-TRANSACTION-ERROR', 'error');
+            $identifier = 'com://site/subscriptions.controller.subscription';    
+            
+            $ret = $this->getService($identifier)->setOrder($this->order->cloneEntity())->add();       
+        } 
+        catch(ComSubscriptionsDomainPaymentException $exception) 
+        {
+            $this->setMessage('COM-SUBSCRIPTIONS-TRANSACTION-ERROR', 'error');
+            
             throw new RuntimeException('Payment process error');
         }
         
@@ -172,9 +179,15 @@
         {
            //clreat the sesion
            $_SESSION['signup'] = null;
+           
            KRequest::set('session.subscriber_id', $ret->person->id);
-           $context->response->setRedirect(JRoute::_('option=com_subscriptions&view=signup&layout=processed&id='.$this->getItem()->id));           
-        } else {
+           
+           $url = JRoute::_('option=com_subscriptions&view=signup&layout=processed&id='.$this->getItem()->id);
+           
+           $context->response->setRedirect( $url );           
+        } 
+        else 
+        {
             throw new RuntimeException('Couldn\'t subscribe');
         }
     }
@@ -188,8 +201,8 @@
      */
     public function validatePayment(KCommandContext $context)
     {
-    	$data 		= $context->data;
-    	$package	= $this->getItem();
+    	$data = $context->data;
+    	$package = $this->getItem();
 		    	
     	if ( $data->token ) 
     	{
@@ -213,17 +226,19 @@
 	    	if ( !$this->creditcard->is_valid() ) 
 	    	{
 	    	    $error = true;
-	    	    $this->storeValue('credit_card_error', JText::_('COM-SUB-CREDITCARD-INVALID'));
+	    	    $this->storeValue('credit_card_error', JText::_('COM-SUBSCRIPTIONS-CREDITCARD-INVALID'));
 	    	}
 	    	
 	    	//validate contact    	
 	    	$contact = $this->contact;    	
+            
 			if( !($contact->address && $contact->city && $contact->country && $contact->state && $contact->zip) ) 
 			{
-			    $this->storeValue('address_error', JText::_('COM-SUB-BILLING-INVALID'));                
+			    $this->storeValue('address_error', JText::_('COM-SUBSCRIPTIONS-BILLING-INVALID'));                
 			}
 			
-			if ( $error ) {
+			if ( $error ) 
+			{
 			    $context->response->setRedirect($url);
 			}
 			
@@ -240,15 +255,17 @@
      */    
     public function validateUser(KCommandContext $context)
     {
-    	$package	= $this->getItem();
-        
+    	$package = $this->getItem();
+
         //validate user
-    	if ( get_viewer()->guest() )
+    	if ( get_viewer()->guest() && !$this->person->validateEntity() )
     	{
-    	    if ( !$this->person->validateEntity() ) {
-    	        $context->response->setRedirect(JRoute::_('option=com_subscriptions&view=signup&layout=login&id='.$package->id));
-    	    }
-    	}    	
+    	   $url = JRoute::_( 'option=com_subscriptions&view=signup&layout=login&id='.$package->id );    
+    	   $context->response->setRedirect( $url );
+    	   return false;
+        }    	
+
+        return true;
     }
     
 	 /**
@@ -309,6 +326,7 @@
     protected function _instantiateCoupon(KConfig $data)
     {
         $this->coupon_code = $data->coupon_code;
+        
         $this->coupon = $this->getService('repos://site/subscriptions.coupon')
             ->find(array('code'=>$this->coupon_code));
         
@@ -376,10 +394,15 @@
 	        "year" 		 => $creditcard->year,
 	        "verification_value" => $creditcard->csv
         );    	
+    	
     	$creditcard = new Merchant_Billing_CreditCard($creditcard_data);
+        
         $this->creditcard = $creditcard;
+        
         $contact = $this->_instantiateContact($data);
+        
         $this->order->setPaymentMethod(new ComSubscriptionsDomainPaymentMethodCreditcard($creditcard, $contact));
+        
         return $creditcard;
     }
     
@@ -410,7 +433,8 @@
             ->reset()
             ->setData($user_data);            
         }    	
-        else {
+        else 
+        {
             $person = get_viewer();    
         }
         
@@ -418,6 +442,7 @@
 		
 		$this->person = $person;
 		$this->user   = $person;
+		
 		return $person;
     }
  }

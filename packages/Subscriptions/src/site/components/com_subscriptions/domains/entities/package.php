@@ -27,10 +27,10 @@
  */
 class ComSubscriptionsDomainEntityPackage extends ComBaseDomainEntityNode
 {
-	const BILLING_PERIOD_YEAR		= 'Year';
-	const BILLING_PERIOD_MONTH		= 'Month';
-	const BILLING_PERIOD_WEEK		= 'Week';
-	const BILLING_PERIOD_DAY		= 'Day';
+	const BILLING_PERIOD_YEAR = 'Year';
+	const BILLING_PERIOD_MONTH = 'Month';
+	const BILLING_PERIOD_WEEK = 'Week';
+	const BILLING_PERIOD_DAY = 'Day';
 	
 	/**
 	 * Package transaction object
@@ -50,8 +50,9 @@ class ComSubscriptionsDomainEntityPackage extends ComBaseDomainEntityNode
     {
 		parent::__construct($config);
 		
-		$this->getService('repos:people.person')
-			->addBehavior('com://site/subscriptions.domain.behavior.subscriber');		
+		$this
+		->getService('repos:people.person')
+		->addBehavior('com://site/subscriptions.domain.behavior.subscriber');		
 	}
 	
 	/**
@@ -66,35 +67,39 @@ class ComSubscriptionsDomainEntityPackage extends ComBaseDomainEntityNode
 	protected function _initialize(KConfig $config)
 	{
 		$config->append(array(
-			'resources'			=> array('subscriptions_packages'),
-			'attributes'		=> array(
-				'name'			=> array('required'=>true),
-				'price'     	=> array('type'=>'float', 	'required'=>true),	
-				'duration'  	=> array('type'=>'integer', 'required'=>true),
-				'recurring' 	=> array('type'=>'integer', 'default'=>0),
+			'resources'	=> array('subscriptions_packages'),
+			'attributes' => array(
+				'name' => array('required'=>true),
+                'body' => array('format'=>'html'),
+				'price' => array('type'=>'float', 'required'=>true),	
+				'duration' => array('type'=>'integer', 'required'=>true),
+				'recurring' => array('type'=>'integer', 'default' => 0),
 				'billingPeriod'	=> array('column'=>'billing_period', 'required'=>true) 				
 			),			
 			'relationships' => array(
 			    //let the cleaner to take care of it
-				'subscriptions' => array('parent_delete'=>'ignore')				
+				'subscriptions' => array ( 
+				    'parent_delete' => 'ignore'
+                 )			
 			),
 			'behaviors' => array(
 				'authorizer',
 				'orderable',
 				'describable',
 				'enableable',
-				'dictionariable'
+				'dictionariable',
+				'modifiable'
 			)
 		));
 				
 		parent::_initialize($config);
 	}
 	
-	public function setBillingPeriod($billingPeriod)
+	public function setBillingPeriod( $billingPeriod )
 	{
-		$this->set('billingPeriod', $billingPeriod);
+		$this->set( 'billingPeriod', $billingPeriod );
 	
-		switch($this->billingPeriod)
+		switch( $this->billingPeriod )
 		{
 			case self::BILLING_PERIOD_YEAR;
 				$this->duration = AnHelperDate::yearToSeconds();
@@ -121,7 +126,7 @@ class ComSubscriptionsDomainEntityPackage extends ComBaseDomainEntityNode
 	 */
 	public function getUpgradePrice()
 	{
-		return (float)$this->price - ($this->price * $this->getUpgradeDiscount());
+		return (float) $this->price - ($this->price * $this->getUpgradeDiscount());
 	}	
 	
 	/**
@@ -132,9 +137,11 @@ class ComSubscriptionsDomainEntityPackage extends ComBaseDomainEntityNode
 	public function getUpgradeDiscount()
 	{
 		if ( $this->ordering <= 1 )
+        {
 			return 0;
-					
-		return $this->getValue('upgrade_discount', 0);
+        }
+        			
+		return $this->getValue( 'upgrade_discount', 0 );
 	}
 	
 	/**
@@ -147,10 +154,14 @@ class ComSubscriptionsDomainEntityPackage extends ComBaseDomainEntityNode
 	public function setUpgradeDiscount($discount)
 	{
 		if ( $this->ordering <= 1 )
+        {
 			$discount = 0;
-			
-		$discount = (float) min(1, max(0, $discount));
-		$this->setValue('upgrade_discount', $discount);
+        }
+        	
+		$discount = (float) min( 1, max( 0, $discount ) );
+		
+		$this->setValue( 'upgrade_discount', $discount );
+		
 		return $this;
 	}
 	
@@ -160,9 +171,10 @@ class ComSubscriptionsDomainEntityPackage extends ComBaseDomainEntityNode
 	 * @param array $values The plugins configuration value
 	 * @return void
 	 */
-	public function setPluginsValues(array $values)
+	public function setPluginsValues( array $values )
 	{
-		$this->setValue('plugins', $values);
+		$this->setValue( 'plugins', $values );
+        
 		return $this;
 	}
 	
@@ -175,8 +187,9 @@ class ComSubscriptionsDomainEntityPackage extends ComBaseDomainEntityNode
 	 */
 	public function getPluginValues($plugin)
 	{
-		$values = (array)$this->getValue('plugins');
-		return isset($values[$plugin]) ? $values[$plugin] : array();
+		$values = (array) $this->getValue( 'plugins' );
+        
+		return isset( $values[$plugin] ) ? $values[$plugin] : array();
 	}	
 	
 	
@@ -191,7 +204,7 @@ class ComSubscriptionsDomainEntityPackage extends ComBaseDomainEntityNode
 	{
 		$viewer = $context->viewer;
 		
-		return !$viewer->hasSubscription() || $this->authorize('upgradepackage');
+		return !$viewer->hasSubscription(false) || $this->authorize( 'upgradepackage' );
 	}
 
 	/**
@@ -205,10 +218,13 @@ class ComSubscriptionsDomainEntityPackage extends ComBaseDomainEntityNode
 	{		
 		$viewer = $context->viewer;
 		
-		if ( !$viewer->hasSubscription() )
+		if( !$viewer->hasSubscription() )
+        {
 			return false; 
-		$package		= $viewer->subscription->package;		
-		return !$this->eql($package) && 
-			($package->duration < $this->duration || $package->price < $this->price);
+        }
+        
+		$package = $viewer->subscription->package;	
+        	
+		return !$this->eql( $package ) && ( $package->duration < $this->duration || $package->price < $this->price );
 	}
 }

@@ -86,7 +86,7 @@ class JAdministrator extends JApplication
 		// One last check to make sure we have something
 		if(!JLanguage::exists($options['language']))
 			$options['language'] = 'en-GB';
-
+			
 		parent::initialise($options);
 	}
 
@@ -98,13 +98,11 @@ class JAdministrator extends JApplication
 	function route()
 	{
 		$uri = JURI::getInstance();
-
-		if($this->getCfg('force_ssl') >= 1 && strtolower($uri->getScheme()) != 'https') 
-		{
-			//forward to https
-			$uri->setScheme('https');
-			$this->redirect($uri->toString());
-		}
+        
+		//forward to https
+		$scheme = (isSSL()) ? 'https' : 'http';
+		$uri->setScheme( $scheme );
+		$this->redirect($uri->toString());
 	}
 
 	/**

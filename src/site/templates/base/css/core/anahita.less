@@ -12,23 +12,32 @@ form.inline-edit
     }	
 }
 
-.media-grid
+@media ( max-width: 480px ) 
 {
-    margin: 0 -10px;
+    .thumbnail {
+        padding: 0;
+    }
+}
+
+.media-grid
+{    
     .clearfix;
     
+    margin: 10px -1%;
+   
     > div 
     {
         float: left;
+        width: 18%;
+        margin:  1%;
         
         a
         {
             display: block;
         }
         
-        img
-        {
-            margin: 10px;
+        img {
+           max-width: 100%;
         }
     }
 }
@@ -36,10 +45,7 @@ form.inline-edit
 .an-read-more,
 .an-read-less
 {
-    display: block;
-    font-size: @baseFontSize;
-    font-weight: bold;
-    margin-top: 5px;
+    font-size: @baseFontSize + 1;
 }
 
 .an-meta
@@ -89,34 +95,6 @@ ul.an-navigations
     }	
 }
 
-.actions
-{
-    .form-actions;
-    padding: 10px;	
-}
-
-.well
-{
-    margin: 15px 0;	
-}
-
-form
-{
-    legend
-    {
-        margin-bottom: 20px;
-    }	
-}
-
-// vote button adjustment
-a.vote-action
-{
-    &.btn
-    {
-       margin-bottom: 1px;
-    }
-}
-
 .an-actions
 {
     a
@@ -143,43 +121,6 @@ ul.an-actions
             font-size: @baseFontSize;
         }
     }
-}
-
-//Scrollbar CSS
-.scrollbar 
-{
-    width: 21px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0;
-    visibility: hidden;
-    z-index: 1011;
-    
-    .knob 
-    {
-	    background: @gray;
-	    width: 5px;
-	    height: 50px;
-	    margin: 0 10px;
-	    .border-radius(@baseBorderRadius);
-	    cursor: pointer;
-	    -moz-opacity: 0.75;
-	    opacity: 0.75;
-	    
-	    &:hover {
-		    -moz-opacity: 1;
-		    opacity: 1;    
-		}
-	}
-}
-
-.dropdown-menu
-{
-    a:hover
-    {
-        cursor: pointer;
-    }	
 }
 
 .modal

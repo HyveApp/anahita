@@ -1,6 +1,6 @@
 <?php defined('_JEXEC') or die('Restricted access'); ?>
 
-<?php JHTML::_('behavior.tooltip'); ?>
+<?php  ?>
 
 <?php
 	JToolBarHelper::title( JText::_( 'Plugin Manager' ), 'plugin.png' );
@@ -77,7 +77,7 @@
 	for ($i=0, $n=count( $rows ); $i < $n; $i++) {
 	$row 	= $rows[$i];
 
-	$link = JRoute::_( 'index.php?option=com_plugins&view=plugin&client='. $this->client .'&task=edit&cid[]='. $row->id );
+	$link = 'index.php?option=com_plugins&view=plugin&task=edit&cid[]='. $row->id;
 
 	$access 	= JHTML::_('grid.access',   $row, $i );
 	$checked 	= JHTML::_('grid.checkedout',   $row, $i );

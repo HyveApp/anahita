@@ -111,8 +111,10 @@ class LibBaseTemplateHelperSelector extends KTemplateHelperAbstract implements K
 		);
 		
 		unset($options->prompt);
-		if ( $prompt ) {
-			$array  = array(JText::_('LIB-AN-SELECTOR-SELECT-MONTH'));
+        
+		if ( $prompt ) 
+		{
+			$array  = array(JText::_('LIB-AN-SELECTOR-SELECT-MONTH'), null);
 			$months = AnHelperArray::merge($array, $months);
 		}				
 		
@@ -145,7 +147,8 @@ class LibBaseTemplateHelperSelector extends KTemplateHelperAbstract implements K
 		unset($options->prompt);
 		$years = array_combine(range($options->start, $options->end), range($options->start, $options->end));
 		
-		if ( $prompt ) {
+		if ( $prompt ) 
+		{
 			$array  = array(JText::_('LIB-AN-SELECTOR-SELECT-YEAR'));
 			$years = AnHelperArray::merge($array, $years);			
 		}	
@@ -190,6 +193,7 @@ class LibBaseTemplateHelperSelector extends KTemplateHelperAbstract implements K
 	public function country($options = array())
 	{
 		$options   = new KConfig($options);
+		
 		$options->append(array(
 			'id'               => 'an-se-selection-countries-'.uniqid(),
 			'selected'         => null,
@@ -197,11 +201,17 @@ class LibBaseTemplateHelperSelector extends KTemplateHelperAbstract implements K
 			'use_country_code' => true,	
 			'prompt'           => true
 		));
+        
 		$selected  = $options->selected;
 		$use_country_code = $options->use_country_code;
+		
 		unset($options->selected);		
 		unset($options->use_country_code);		
-		$countries = array();
+		
+		$countries = array(
+            null => JText::_('LIB-AN-SELECTOR-SELECT-OPTION')
+        );
+		
 		foreach(self::$COUNTRIES as $key => $name)
 		{
 			$countries[$use_country_code ? $key : $name] = JText::_($name);
@@ -223,7 +233,6 @@ class LibBaseTemplateHelperSelector extends KTemplateHelperAbstract implements K
 		$options->append(array(
 			'country_selector' => null,
 			'country'		   => 'US',
-			'id'			   => uniqid(),
 			'selected'		   => null,
 			'use_state_code'   => true,
 			'prompt'   => true		
@@ -232,67 +241,20 @@ class LibBaseTemplateHelperSelector extends KTemplateHelperAbstract implements K
 		
 		$country = strtolower($options->country);
 
-		
+        $country_selector = null;
+
 		if( $options->country_selector )
-		{
-			$doc = JFactory::getDocument();
-			
-			static $function_declration;
-						
-			if ( !$function_declration )
-			{
-				$function_declration = "function toggleStates(country, div){	
-					div = document.id(div);
-					div.set('html','');
-					country = document.id(country);					
-					var states 	  = div.retrieve('states');
-					var provinces = div.retrieve('provinces');
-					var custom 	  = div.retrieve('custom');
-					if ( country.value == 'United States' || country.value == 'US')
-						div.adopt(states);
-					else if ( country.value == 'Canada' || country.value == 'CA' )
-						div.adopt(provinces);
-					else
-						div.adopt(custom);
-				}
-				function storeElements(country, div)
-				{
-					div = document.id(div);
-					var states 	  = div.getElement('[country=\"us\"]').clone();
-					var provinces = div.getElement('[country=\"canada\"]').clone();
-					var custom 	  = div.getElement('[country=\"custom\"]').clone();
-					div.store('states', states).store('provinces',provinces).store('custom', custom);					
-					toggleStates(country, div);	
-				}
-				";
-				
-				$doc->addScriptDeclaration($function_declration);
-			}
-			
-			$div_id	= uniqid();
+		{		
 			$country_selector = $options->country_selector;
-			$script = <<<EOF
-			document.addEvent('domready', function(){
-				storeElements('$country_selector','$div_id');
-			});
-			document.addEvent('change:relay(#$country_selector)', toggleStates.pass(['$country_selector', '$div_id']));
-EOF;
-			$doc->addScriptDeclaration($script);
-			/*
-			$doc
-			->addScriptDeclaration("
-				\$Event('#$div_id domready', storeElements.pass(['$country_selector', '$div_id']));
-				\$Event('#$country_selector change',   toggleStates.pass(['$country_selector', '$div_id']));
-			");*/
 		}
 		
 		$use_state_code = $options->use_state_code;
 		
-		unset($options->use_state_code);
-		unset($options->country);
-		unset($options->country_selector);
+		unset( $options->use_state_code );
+		unset( $options->country );
+		unset( $options->country_selector );
 				
-		$states    = array();
+		$states = array();
 		$provinces = array();
 		
 		foreach(self::$US_STATES as $key => $name)
@@ -301,21 +263,26 @@ EOF;
 		}
 		
 		foreach(self::$CANADA_PROVINCES as $key => $name)
-			$provinces[$use_state_code ? $key : $name] = JText::_($name);
-
+        {
+           $provinces[$use_state_code ? $key : $name] = JText::_($name); 
+        }
+			
 		$selected  = $options->selected;
+		
 		unset($options->selected);
+        
 		$options   = KConfig::unbox($options);
 		
 		$states    = $this->_html->select($options['name'], array('options'=>$states, 'selected'=>$selected), 	 array_merge($options, array('country'=>'us')));
 		$provinces = $this->_html->select($options['name'], array('options'=>$provinces, 'selected'=>$selected), array_merge($options, array('country'=>'canada')));
 		$custom	   = $this->_html->textfield($options['name'], $selected, array_merge($options, array('country'=>'custom')));			
-		if ( empty($country_selector) )
+		
+		if ( empty( $country_selector ) )
 		{
 			return $country == 'us' ? $states : $provinces;
 		}
 		
-		return "<div id=\"$div_id\">$states.$provinces.$custom</div>";		 
+        return $states.$provinces.$custom;	 
 	}
 
 	/**
