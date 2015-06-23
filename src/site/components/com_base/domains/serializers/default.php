@@ -102,6 +102,55 @@ class ComBaseDomainSerializerDefault extends AnDomainSerializerDefault
             
             $data['imageURL'] = $imageURL;           
         }
+
+        if($entity->isCoverable()) 
+        {
+            $imageURL = array();
+            
+            if($entity->coverSet())
+            {
+                $sizes = $entity->getCoverSizes();
+                foreach($sizes as $name => $size) 
+                {
+                    $url = null;
+                    
+                    if($entity->coverSet())
+                    {
+                        $url = $entity->getCoverURL($name);
+                    }
+                    
+                    $parts = explode('x',$size);
+                    $width = 0; $height = 0;
+                    
+                    if(count($parts) == 0)
+                    {
+                        continue;
+                    }
+                    elseif (count($parts) == 1) 
+                    {
+                        $height = $width = $parts[0];
+                    }
+                    else 
+                    {
+                        $width  = $parts[0];
+                        $height = $parts[1];  
+                        //hack to set the ratio based on the original
+                        if($height == 'auto' && isset($sizes['original'])) 
+                        { 
+                           $original_size = explode('x',$sizes['original']);                           
+                           $height = ($width * $original_size[1]) / $original_size[0];
+                        }
+                    }
+                    
+                    $imageURL[$name] = array(
+                        'size' => array('width'=>(int)$width,'height'=>(int)$height),
+                        'url'  => $url  
+                    );
+                }                
+            }
+            
+            $data['coverURL'] = $imageURL;           
+        }
         
         // @todo check for $entity->isAuthorizer() and $entity->authorize('administration') scenarios later on
         if($entity->isAdministrable()) 
